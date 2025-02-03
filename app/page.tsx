@@ -12,6 +12,14 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "Mini Apps Stats",
   description: "Analytics dashboard for WorldID Mini Apps",
+  openGraph: {
+    images: [
+      {
+        url: "/preview.png",
+        alt: "Mini Apps Stats Preview",
+      },
+    ],
+  },
 };
 
 async function getData(): Promise<AppData[]> {
@@ -39,7 +47,7 @@ async function getData(): Promise<AppData[]> {
     for (const metrics of metricsData) {
       const appInfo = appsData.app_rankings?.top_apps?.find(
         (app) => app.app_id === metrics.app_id
-      );  
+      );
 
       if (appInfo) {
         combinedData.push({
