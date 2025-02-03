@@ -8,6 +8,7 @@ import {
   SortDirection,
 } from "./types";
 import Image from "next/image";
+import { SearchField } from "./components/SearchField";
 
 export const metadata: Metadata = {
   title: "World App: Mini Apps Statistics",
@@ -56,6 +57,8 @@ async function getData(): Promise<AppData[]> {
           logo_img_url: appInfo.logo_img_url,
           unique_users_7d: metrics.unique_users_last_7_days || 0,
           unique_users_all_time: metrics.unique_users || 0,
+          total_users_7d: metrics.total_users_last_7_days || 0,
+          total_users_all_time: metrics.total_users || 0,
         });
       }
     }
@@ -70,6 +73,7 @@ async function getData(): Promise<AppData[]> {
 interface HomePageSearchParams {
   sort?: string;
   direction?: string;
+  search?: string;
 }
 
 export default async function Home({
@@ -79,51 +83,106 @@ export default async function Home({
 }) {
   const apps = await getData();
 
-  // Sort the data
+  // Sort and filter the data
   const searchParamsData = await searchParams;
   const sort = searchParamsData.sort;
   const direction = searchParamsData.direction;
+  const searchTerm = searchParamsData.search?.toLowerCase();
 
-  const sortField = (sort || "unique_users_7d") as SortField;
+  const sortField = (sort || "total_users_7d") as SortField;
   const sortDirection = (direction || "desc") as SortDirection;
 
-  const sortedApps = [...apps].sort((a, b) => {
+  // Filter apps by search term
+  const filteredApps = searchTerm
+    ? apps.filter((app) => app.name.toLowerCase().includes(searchTerm))
+    : apps;
+
+  // Sort the filtered apps
+  const sortedApps = [...filteredApps].sort((a, b) => {
     const multiplier = sortDirection === "asc" ? 1 : -1;
     return (a[sortField] - b[sortField]) * multiplier;
   });
 
+  // Calculate total users from filtered apps
+  const totalUsers7d = sortedApps.reduce(
+    (sum, app) => sum + app.total_users_7d,
+    0
+  );
+  const totalUsersAllTime = sortedApps.reduce(
+    (sum, app) => sum + app.total_users_all_time,
+    0
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="h-16 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <a
-            href="https://world.org/ecosystem"
-            className="flex-shrink-0 max-sm:hidden"
-          >
-            <Image
-              src="/world_logo.svg"
-              alt="World Logo"
-              width={120}
-              height={28}
-              className="h-6 w-auto"
-              priority
-            />
-          </a>
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Mini Apps Stats
-          </h1>
-          <div className="w-[120px]" />
+    <div className="min-h-screen bg-gray-50">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-8">
+              <a href="https://world.org/ecosystem" className="flex-shrink-0">
+                <Image
+                  src="/world_logo.svg"
+                  alt="World Logo"
+                  width={120}
+                  height={28}
+                  className="h-6 w-auto"
+                  priority
+                />
+              </a>
+              <h1 className="text-xl font-medium text-gray-900">Summary</h1>
+            </div>
+            <SearchField />
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <SortableTable
-          data={sortedApps}
-          sortField={sortField}
-          sortDirection={sortDirection}
-        />
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-xl font-medium text-gray-900">
+                Total Opens (7d)
+              </h2>
+              {/* <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+                View details →
+              </a> */}
+            </div>
+            <div className="text-3xl font-semibold text-gray-900">
+              {totalUsers7d.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              Total opens across all mini apps in the last 7 days
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-xl font-medium text-gray-900">
+                Total Opens (All Time)
+              </h2>
+              {/* <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+                View details →
+              </a> */}
+            </div>
+            <div className="text-3xl font-semibold text-gray-900">
+              {totalUsersAllTime.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              Total opens across all mini apps
+            </div>
+          </div>
+        </div>
 
-        <div className="mt-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+        {/* Table Section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <SortableTable
+            data={sortedApps}
+            sortField={sortField}
+            sortDirection={sortDirection}
+          />
+        </div>
+
+        <div className="mt-4 text-center text-sm text-gray-500">
           Data updates daily • Last loaded: {new Date().toLocaleString()}
         </div>
       </main>

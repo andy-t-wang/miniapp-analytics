@@ -20,24 +20,21 @@ function SortHeader({
   return (
     <th
       scope="col"
-      className="w-[60px] sm:w-auto px-2 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+      className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
     >
       <a
         href={`?sort=${field}&direction=${nextDirection}`}
-        className="flex items-center justify-end gap-1 group hover:text-gray-700 dark:hover:text-gray-100"
+        className="flex items-center justify-end gap-1 group hover:text-gray-700"
       >
-        <span className="hidden sm:inline">{label}</span>
-        <span className="sm:hidden">
-          {label === "Unique Users (7d)" ? "7d" : "All"}
-        </span>
+        <span>{label}</span>
         <div className="flex flex-col">
           {isActive && currentDirection === "desc" ? (
-            <ChevronDownIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <ChevronDownIcon className="h-4 w-4 text-blue-500" />
           ) : isActive && currentDirection === "asc" ? (
-            <ChevronUpIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <ChevronUpIcon className="h-4 w-4 text-blue-500" />
           ) : (
             <div className="opacity-0 group-hover:opacity-50">
-              <ChevronUpIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <ChevronUpIcon className="h-4 w-4" />
             </div>
           )}
         </div>
@@ -57,26 +54,24 @@ export function SortableTable({
 }) {
   if (data.length === 0) {
     return (
-      <div className="text-center text-gray-500 dark:text-gray-400">
-        No data available
-      </div>
+      <div className="text-center text-gray-500 p-6">No data available</div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
+    <div className="overflow-x-auto">
+      <table className="min-w-full">
+        <thead>
+          <tr className="border-b border-gray-200">
             <th
               scope="col"
-              className="w-8 sm:w-12 px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"
             >
               #
             </th>
             <th
               scope="col"
-              className="w-auto px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               App (Click to Open)
             </th>
@@ -87,14 +82,26 @@ export function SortableTable({
               currentDirection={sortDirection}
             />
             <SortHeader
-              label="Unique Users (All Time)"
+              label="Unique Users (All)"
               field="unique_users_all_time"
+              currentSort={sortField}
+              currentDirection={sortDirection}
+            />
+            <SortHeader
+              label="Total Users (7d)"
+              field="total_users_7d"
+              currentSort={sortField}
+              currentDirection={sortDirection}
+            />
+            <SortHeader
+              label="Total Users (All)"
+              field="total_users_all_time"
               currentSort={sortField}
               currentDirection={sortDirection}
             />
           </tr>
         </thead>
-        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody className="divide-y divide-gray-200">
           {data.map((app, index) => (
             <InteractiveTableRow key={app.app_id} app={app} index={index} />
           ))}

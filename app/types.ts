@@ -4,6 +4,8 @@ export interface AppData {
   logo_img_url: string;
   unique_users_7d: number;
   unique_users_all_time: number;
+  total_users_7d: number;
+  total_users_all_time: number;
 }
 
 export interface TopApp {
@@ -22,7 +24,13 @@ export interface MetricsResponse {
   app_id: string;
   unique_users_last_7_days: number;
   unique_users: number;
+  total_users_last_7_days: number;
+  total_users: number;
 }
 
-export type SortField = "unique_users_7d" | "unique_users_all_time";
+export type SortField =
+  | "unique_users_7d"
+  | "unique_users_all_time"
+  | "total_users_7d"
+  | "total_users_all_time";
 export type SortDirection = "asc" | "desc";
