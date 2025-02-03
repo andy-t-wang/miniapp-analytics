@@ -1,9 +1,16 @@
 import { Metadata } from "next";
 import { SortableTable } from "./components/SortableTable";
-import { AppData, ApiResponse, MetricsResponse } from "./types";
+import {
+  AppData,
+  ApiResponse,
+  MetricsResponse,
+  SortField,
+  SortDirection,
+} from "./types";
+import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "WorldID Mini Apps Analytics",
+  title: "Mini Apps Stats",
   description: "Analytics dashboard for WorldID Mini Apps",
 };
 
@@ -59,19 +66,53 @@ export default async function Home({
 }) {
   const apps = await getData();
 
+  // Sort the data
+  const sort = searchParams?.sort;
+  const direction = searchParams?.direction;
+
+  const sortField = (sort || "unique_users_7d") as SortField;
+  const sortDirection = (direction || "desc") as SortDirection;
+
+  const sortedApps = [...apps].sort((a, b) => {
+    const multiplier = sortDirection === "asc" ? 1 : -1;
+    return (a[sortField] - b[sortField]) * multiplier;
+  });
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-          WorldID Mini Apps Analytics
-        </h1>
-
-        <SortableTable data={apps} searchParams={searchParams} />
-
-        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          Data updates hourly • Last updated: {new Date().toLocaleString()}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <header className="h-16 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <a
+            href="https://world.org/ecosystem"
+            className="flex-shrink-0 max-sm:hidden"
+          >
+            <Image
+              src="/world_logo.svg"
+              alt="World Logo"
+              width={120}
+              height={28}
+              className="h-6 w-auto"
+              priority
+            />
+          </a>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Mini Apps Stats
+          </h1>
+          <div className="w-[120px]" />
         </div>
-      </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <SortableTable
+          data={sortedApps}
+          sortField={sortField}
+          sortDirection={sortDirection}
+        />
+
+        <div className="mt-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          Data updates daily • Last loaded: {new Date().toLocaleString()}
+        </div>
+      </main>
     </div>
   );
 }
