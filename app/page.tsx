@@ -11,7 +11,7 @@ import Image from "next/image";
 import { SearchField } from "./components/SearchField";
 
 export const metadata: Metadata = {
-  title: "World App: Mini Apps Statistics",
+  title: "Mini Apps Statistics",
   description: "Analytics dashboard for World App Mini Apps",
   openGraph: {
     images: [
@@ -114,7 +114,7 @@ export default async function Home({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -129,14 +129,16 @@ export default async function Home({
                   priority
                 />
               </a>
-              <h1 className="text-xl font-medium text-gray-900">Summary</h1>
+              <h1 className="text-xl max-sm:hidden font-medium text-gray-900">
+                Summary
+              </h1>
             </div>
             <SearchField />
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">

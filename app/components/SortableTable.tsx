@@ -1,17 +1,20 @@
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AppData, SortField, SortDirection } from "../types";
 import { InteractiveTableRow } from "./InteractiveTableRow";
+import { ReactNode } from "react";
 
 function SortHeader({
   label,
   field,
   currentSort,
   currentDirection,
+  className = "",
 }: {
-  label: string;
+  label: ReactNode;
   field: SortField;
   currentSort: SortField;
   currentDirection: SortDirection;
+  className?: string;
 }) {
   const isActive = currentSort === field;
   const nextDirection =
@@ -20,13 +23,13 @@ function SortHeader({
   return (
     <th
       scope="col"
-      className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+      className={`px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap ${className}`}
     >
       <a
         href={`?sort=${field}&direction=${nextDirection}`}
         className="flex items-center justify-end gap-1 group hover:text-gray-700"
       >
-        <span>{label}</span>
+        {label}
         <div className="flex flex-col">
           {isActive && currentDirection === "desc" ? (
             <ChevronDownIcon className="h-4 w-4 text-blue-500" />
@@ -65,18 +68,23 @@ export function SortableTable({
           <tr className="border-b border-gray-200">
             <th
               scope="col"
-              className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"
+              className="pl-3 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"
             >
               #
             </th>
             <th
               scope="col"
-              className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              App (Click to Open)
+              App
             </th>
             <SortHeader
-              label="Unique Users (7d)"
+              label={
+                <span>
+                  <span className="sm:hidden">Unique (7d)</span>
+                  <span className="hidden sm:inline">Unique Users (7d)</span>
+                </span>
+              }
               field="unique_users_7d"
               currentSort={sortField}
               currentDirection={sortDirection}
@@ -86,18 +94,21 @@ export function SortableTable({
               field="unique_users_all_time"
               currentSort={sortField}
               currentDirection={sortDirection}
+              className="hidden sm:table-cell"
             />
             <SortHeader
               label="Total Users (7d)"
               field="total_users_7d"
               currentSort={sortField}
               currentDirection={sortDirection}
+              className="hidden sm:table-cell"
             />
             <SortHeader
               label="Total Users (All)"
               field="total_users_all_time"
               currentSort={sortField}
               currentDirection={sortDirection}
+              className="hidden sm:table-cell"
             />
           </tr>
         </thead>
