@@ -10,8 +10,8 @@ import {
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Mini Apps Stats",
-  description: "Analytics dashboard for WorldID Mini Apps",
+  title: "World App: Mini Apps Statistics",
+  description: "Analytics dashboard for World App Mini Apps",
   openGraph: {
     images: [
       {
