@@ -29,21 +29,22 @@ async function getData(): Promise<AppData[]> {
       throw new Error("Failed to fetch data");
     }
 
-    const metricsData: MetricsResponse[] = await metricsRes.json();
+    const metricsData: Record<string, MetricsResponse> =
+      await metricsRes.json();
     const appsData: ApiResponse = await appsRes.json();
 
     // Combine the data
     const combinedData: AppData[] = [];
 
     // Process each app in the metrics data
-    for (const metrics of metricsData) {
+    for (const [appId, metrics] of Object.entries(metricsData)) {
       const appInfo = appsData.app_rankings?.top_apps?.find(
-        (app) => app.app_id === metrics.app_id
+        (app) => app.app_id === appId
       );
 
       if (appInfo) {
         combinedData.push({
-          app_id: metrics.app_id,
+          app_id: appId,
           name: appInfo.name,
           logo_img_url: appInfo.logo_img_url,
           unique_users_7d: metrics.unique_users_last_7_days || 0,
@@ -59,16 +60,22 @@ async function getData(): Promise<AppData[]> {
   }
 }
 
+interface HomePageSearchParams {
+  sort?: string;
+  direction?: string;
+}
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { sort?: string; direction?: string };
+  searchParams: Promise<HomePageSearchParams>;
 }) {
   const apps = await getData();
 
   // Sort the data
-  const sort = searchParams?.sort;
-  const direction = searchParams?.direction;
+  const searchParamsData = await searchParams;
+  const sort = searchParamsData.sort;
+  const direction = searchParamsData.direction;
 
   const sortField = (sort || "unique_users_7d") as SortField;
   const sortDirection = (direction || "desc") as SortDirection;

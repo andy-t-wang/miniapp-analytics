@@ -1,5 +1,3 @@
-"use server";
-
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AppData, SortField, SortDirection } from "../types";
 import { InteractiveTableRow } from "./InteractiveTableRow";
@@ -48,7 +46,7 @@ function SortHeader({
   );
 }
 
-export async function SortableTable({
+export function SortableTable({
   data,
   sortField,
   sortDirection,
