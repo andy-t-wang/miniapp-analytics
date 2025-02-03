@@ -29,22 +29,21 @@ async function getData(): Promise<AppData[]> {
       throw new Error("Failed to fetch data");
     }
 
-    const metricsData: Record<string, MetricsResponse> =
-      await metricsRes.json();
+    const metricsData: MetricsResponse[] = await metricsRes.json();
     const appsData: ApiResponse = await appsRes.json();
 
     // Combine the data
     const combinedData: AppData[] = [];
 
     // Process each app in the metrics data
-    for (const [appId, metrics] of Object.entries(metricsData)) {
+    for (const metrics of metricsData) {
       const appInfo = appsData.app_rankings?.top_apps?.find(
-        (app) => app.app_id === appId
-      );
+        (app) => app.app_id === metrics.app_id
+      );  
 
       if (appInfo) {
         combinedData.push({
-          app_id: appId,
+          app_id: metrics.app_id,
           name: appInfo.name,
           logo_img_url: appInfo.logo_img_url,
           unique_users_7d: metrics.unique_users_last_7_days || 0,
