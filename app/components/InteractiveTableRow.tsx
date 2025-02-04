@@ -119,13 +119,13 @@ export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Total Users (7d)</span>
+                <span className="text-sm text-gray-500">Total Opens (7d)</span>
                 <span className="text-sm font-medium text-gray-900">
                   {app.total_users_7d.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Total Users (All)</span>
+                <span className="text-sm text-gray-500">Total Opens (All)</span>
                 <span className="text-sm font-medium text-gray-900">
                   {app.total_users_all_time.toLocaleString()}
                 </span>
