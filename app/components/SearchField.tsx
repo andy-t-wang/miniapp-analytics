@@ -4,17 +4,20 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { useAnalytics } from "./AnalyticsWrapper";
 
 export function SearchField() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const { trackSearch } = useAnalytics();
 
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
     if (term) {
       params.set("search", term);
+      trackSearch(term);
     } else {
       params.delete("search");
     }

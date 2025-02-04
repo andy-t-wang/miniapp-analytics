@@ -5,6 +5,7 @@ import { QRCodePopup } from "./QRCodePopup";
 import { AppData } from "../types";
 import Image from "next/image";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { posthog } from "../lib/posthog";
 
 interface InteractiveTableRowProps {
   app: AppData;
@@ -22,11 +23,25 @@ export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
     } else {
       // On desktop, show the QR code popup
       setShowQRCode(true);
+
+      // Track QR code view event
+      posthog.capture("mini_app_qr_viewed", {
+        app_id: app.app_id,
+        app_name: app.name,
+      });
     }
   };
 
   const handleTryItOut = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent row from collapsing
+
+    // Track the event
+    posthog.capture("mini_app_opened", {
+      app_id: app.app_id,
+      app_name: app.name,
+      source: "mobile_expanded",
+    });
+
     window.location.href = `http://worldcoin.org/mini-app?app_id=${app.app_id}`;
   };
 

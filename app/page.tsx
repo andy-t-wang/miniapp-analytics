@@ -9,6 +9,10 @@ import {
 } from "./types";
 import Image from "next/image";
 import { SearchField } from "./components/SearchField";
+import {
+  PageViewTracker,
+  AnalyticsWrapper,
+} from "./components/AnalyticsWrapper";
 
 export const metadata: Metadata = {
   title: "Mini Apps Statistics",
@@ -115,6 +119,7 @@ export default async function Home({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <PageViewTracker />
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -133,7 +138,9 @@ export default async function Home({
                 Summary
               </h1>
             </div>
-            <SearchField />
+            <AnalyticsWrapper>
+              <SearchField />
+            </AnalyticsWrapper>
           </div>
         </div>
       </header>
@@ -146,9 +153,6 @@ export default async function Home({
               <h2 className="text-xl font-medium text-gray-900">
                 Total Opens (7d)
               </h2>
-              {/* <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
-                View details →
-              </a> */}
             </div>
             <div className="text-3xl font-semibold text-gray-900">
               {totalUsers7d.toLocaleString()}
@@ -162,9 +166,6 @@ export default async function Home({
               <h2 className="text-xl font-medium text-gray-900">
                 Total Opens (All Time)
               </h2>
-              {/* <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
-                View details →
-              </a> */}
             </div>
             <div className="text-3xl font-semibold text-gray-900">
               {totalUsersAllTime.toLocaleString()}
@@ -177,11 +178,13 @@ export default async function Home({
 
         {/* Table Section */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <SortableTable
-            data={sortedApps}
-            sortField={sortField}
-            sortDirection={sortDirection}
-          />
+          <AnalyticsWrapper>
+            <SortableTable
+              data={sortedApps}
+              sortField={sortField}
+              sortDirection={sortDirection}
+            />
+          </AnalyticsWrapper>
         </div>
 
         <div className="mt-4 text-center text-sm text-gray-500">
