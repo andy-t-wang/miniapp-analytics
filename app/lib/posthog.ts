@@ -3,7 +3,7 @@
 // Custom analytics function that uses our proxy
 async function captureEvent(
   eventName: string,
-  properties?: Record<string, any>
+  properties?: Record<string, unknown>
 ) {
   try {
     const response = await fetch("/api/analytics", {
