@@ -97,14 +97,14 @@ export function SortableTable({
               className="hidden sm:table-cell"
             />
             <SortHeader
-              label="Total Users (7d)"
+              label="Total Opens (7d)"
               field="total_users_7d"
               currentSort={sortField}
               currentDirection={sortDirection}
               className="hidden sm:table-cell"
             />
             <SortHeader
-              label="Total Users (All)"
+              label="Total Opens (All)"
               field="total_users_all_time"
               currentSort={sortField}
               currentDirection={sortDirection}
