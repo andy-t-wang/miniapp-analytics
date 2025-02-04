@@ -1,21 +1,25 @@
 "use client";
 
-import { useEffect, createContext, useContext } from "react";
+import { useEffect, createContext, useContext, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { analytics } from "../lib/posthog";
 
 // Component for tracking page views without wrapping content
 export function PageViewTracker() {
   const searchParams = useSearchParams();
+  const hasTracked = useRef(false);
 
   useEffect(() => {
-    analytics.capture("page_view", {
-      page: "mini_apps_stats",
-      search_term: searchParams.get("search") || undefined,
-      sort_field: searchParams.get("sort") || "total_users_7d",
-      sort_direction: searchParams.get("direction") || "desc",
-    });
-  }, [searchParams]);
+    if (!hasTracked.current) {
+      analytics.capture("page_view", {
+        page: "mini_apps_stats",
+        search_term: searchParams.get("search") || undefined,
+        sort_field: searchParams.get("sort") || "total_users_7d",
+        sort_direction: searchParams.get("direction") || "desc",
+      });
+      hasTracked.current = true;
+    }
+  }); // Empty dependency array means this runs once on mount
 
   return null;
 }
