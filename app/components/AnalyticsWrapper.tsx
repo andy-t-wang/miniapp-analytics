@@ -2,14 +2,14 @@
 
 import { useEffect, createContext, useContext } from "react";
 import { useSearchParams } from "next/navigation";
-import { posthog } from "../lib/posthog";
+import { analytics } from "../lib/posthog";
 
 // Component for tracking page views without wrapping content
 export function PageViewTracker() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    posthog.capture("page_view", {
+    analytics.capture("page_view", {
       page: "mini_apps_stats",
       search_term: searchParams.get("search") || undefined,
       sort_field: searchParams.get("sort") || "total_users_7d",
@@ -43,21 +43,21 @@ export function useAnalytics() {
 
 // Wrapper that provides analytics tracking functions
 export function AnalyticsWrapper({ children }: { children: React.ReactNode }) {
-  const analytics: AnalyticsContextType = {
+  const analyticsContext: AnalyticsContextType = {
     trackSearch: (term) => {
-      posthog.capture("search_performed", {
+      analytics.capture("search_performed", {
         search_term: term,
       });
     },
     trackMiniAppOpen: (appId, appName, source) => {
-      posthog.capture("mini_app_opened", {
+      analytics.capture("mini_app_opened", {
         app_id: appId,
         app_name: appName,
         source: source,
       });
     },
     trackSort: (field, direction) => {
-      posthog.capture("table_sorted", {
+      analytics.capture("table_sorted", {
         sort_field: field,
         sort_direction: direction,
       });
@@ -65,7 +65,7 @@ export function AnalyticsWrapper({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AnalyticsContext.Provider value={analytics}>
+    <AnalyticsContext.Provider value={analyticsContext}>
       {children}
     </AnalyticsContext.Provider>
   );

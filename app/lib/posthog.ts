@@ -1,14 +1,31 @@
 "use client";
 
-import posthog from "posthog-js";
+// Custom analytics function that uses our proxy
+async function captureEvent(
+  eventName: string,
+  properties?: Record<string, any>
+) {
+  try {
+    const response = await fetch("/api/analytics", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: eventName,
+        properties,
+        timestamp: new Date().toISOString(),
+      }),
+    });
 
-if (typeof window !== "undefined") {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://app.posthog.com",
-    loaded: (posthog) => {
-      if (process.env.NODE_ENV === "development") posthog.debug();
-    },
-  });
+    if (!response.ok) {
+      throw new Error("Failed to send analytics");
+    }
+  } catch (error) {
+    console.error("Analytics error:", error);
+  }
 }
 
-export { posthog };
+export const analytics = {
+  capture: captureEvent,
+};
