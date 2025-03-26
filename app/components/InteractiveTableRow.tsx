@@ -42,7 +42,7 @@ export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
       source: "mobile_expanded",
     });
 
-    window.location.href = `http://worldcoin.org/mini-app?app_id=${app.app_id}`;
+    window.location.href = `https://worldcoin.org/mini-app?app_id=${app.app_id}`;
   };
 
   return (

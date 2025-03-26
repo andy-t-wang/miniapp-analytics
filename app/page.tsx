@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { SortableTable } from "./components/SortableTable";
 import {
   AppData,
@@ -14,18 +15,27 @@ import {
   AnalyticsWrapper,
 } from "./components/AnalyticsWrapper";
 
-export const metadata: Metadata = {
-  title: "Mini Apps Statistics",
-  description: "Analytics dashboard for World App Mini Apps",
-  openGraph: {
-    images: [
-      {
-        url: "/preview.png",
-        alt: "Mini Apps Stats Preview",
-      },
-    ],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const headersList = await headers();
+  const baseUrl = headersList.get("host") ?? "localhost:3000";
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+  const screenshotUrl = `${protocol}://${baseUrl}/api/screenshot`;
+
+  return {
+    title: "Mini Apps Statistics",
+    description: "Analytics dashboard for World App Mini Apps",
+    openGraph: {
+      images: [
+        {
+          url: screenshotUrl,
+          alt: "Mini Apps Stats Preview",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+  };
+}
 
 async function getData(): Promise<AppData[]> {
   try {
