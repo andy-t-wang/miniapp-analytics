@@ -1,59 +1,35 @@
 import { NextResponse } from "next/server";
-import { chromium } from "@playwright/test";
+import mql from "@microlink/mql";
 
 export const revalidate = 86400; // 24 hours
 
 export async function GET(request: Request) {
-  let browser;
   try {
     console.log("Starting screenshot generation...");
-    browser = await chromium.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    console.log("Browser launched successfully");
-
-    const context = await browser.newContext({
-      viewport: { width: 1200, height: 630 },
-      userAgent:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    });
-    const page = await context.newPage();
-    console.log("Page created and viewport set");
 
     // Get the base URL from the request
     const url = new URL(request.url);
     const baseUrl = `${url.protocol}//${url.host}`;
-    console.log("Navigating to:", baseUrl);
+    console.log("Taking screenshot of:", baseUrl);
 
-    // Navigate to the main page instead of the screenshot endpoint
-    const response = await page.goto(baseUrl, {
-      waitUntil: "networkidle",
-      timeout: 30000,
+    const { data } = await mql(baseUrl, {
+      screenshot: true,
+      meta: false,
+      adblock: true,
+      viewport: {
+        width: 1200,
+        height: 630,
+        deviceScaleFactor: 1,
+      },
     });
 
-    if (!response) {
-      throw new Error("Failed to get response from page");
+    if (!data?.screenshot?.url) {
+      throw new Error("Failed to generate screenshot");
     }
 
-    console.log("Page loaded, status:", response.status());
-
-    // Wait for the content to be fully loaded
-    try {
-      await page.waitForSelector(".bg-white", { timeout: 10000 });
-      console.log("Content loaded successfully");
-    } catch (selectorError) {
-      console.error("Failed to find content:", selectorError);
-      // Continue anyway as the page might still be usable
-    }
-
-    // Take a screenshot
-    console.log("Taking screenshot...");
-    const screenshot = await page.screenshot({
-      type: "png",
-      fullPage: false,
-    });
-    console.log("Screenshot taken successfully");
+    // Fetch the screenshot from Microlink
+    const screenshotResponse = await fetch(data.screenshot.url);
+    const screenshot = await screenshotResponse.arrayBuffer();
 
     return new NextResponse(screenshot, {
       headers: {
@@ -75,14 +51,5 @@ export async function GET(request: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    if (browser) {
-      try {
-        await browser.close();
-        console.log("Browser closed successfully");
-      } catch (closeError) {
-        console.error("Error closing browser:", closeError);
-      }
-    }
   }
 }
