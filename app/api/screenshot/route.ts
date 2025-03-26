@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 
 export const revalidate = 86400; // 24 hours
 
@@ -9,11 +9,14 @@ export async function GET(request: Request) {
     console.log("Starting screenshot generation...");
     browser = await chromium.launch({
       headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     console.log("Browser launched successfully");
 
     const context = await browser.newContext({
       viewport: { width: 1200, height: 630 },
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     });
     const page = await context.newPage();
     console.log("Page created and viewport set");

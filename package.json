@@ -6,11 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "playwright install chromium"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@playwright/test": "^1.51.1",
     "next": "15.1.6",
     "playwright": "^1.51.1",
     "playwright-core": "^1.51.1",
