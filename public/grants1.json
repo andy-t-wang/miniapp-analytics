@@ -25,7 +25,7 @@
     "value": 2117
   },
   {
-    "id": "app_3876b5f39809a50bb5ebe97c997bbcf1",
+    "id": "app_e1beb4eee66ec6ec4c6684d81b878ff7",
     "name": "ORB",
     "value": 1071
   },
@@ -45,83 +45,83 @@
     "value": 717
   },
   {
+    "id": "app_ec193da56e4e39b91afe72c2b3a6a09b",
+    "name": "Golden Otter",
+    "value": 630
+  },
+  {
     "id": "app_8aeb55d57b7be834fb8d67e2f803d258",
     "name": "AXO",
-    "value": 630
+    "value": 578
   },
   {
     "id": "app_f12d676b28252ffa1937a3453590e078",
     "name": "Cash Daily",
-    "value": 578
+    "value": 560
   },
   {
     "id": "app_49fe40f83cfcdf67b7ba716d37e927e4",
     "name": "Cash Convert",
-    "value": 560
+    "value": 550
+  },
+  {
+    "id": "app_8d09da48ea47a1345a82138c9ef720e2",
+    "name": "World Billboard",
+    "value": 541
   },
   {
     "id": "app_8c63022b2b60500c57128b005eb349a8",
     "name": "GalAxo",
-    "value": 550
+    "value": 492
   },
   {
     "id": "app_5dee2f19cd6eef599eb6ab275a0a7523",
     "name": "Sage",
-    "value": 541
+    "value": 417
+  },
+  {
+    "id": "app_bd741f81dc7e30a9286ce8e3d4c4a39f",
+    "name": "SuperCat",
+    "value": 408
   },
   {
     "id": "app_523d41b3715a1c0138ffe1794851df36",
     "name": "The Button",
-    "value": 492
+    "value": 395
+  },
+  {
+    "id": "app_baf6d315fd5f8f277f5e954e035aecd4",
+    "name": "Earn ASADO",
+    "value": 355
   },
   {
     "id": "app_9fe9b198f2959d1bb745f81e972e23e6",
     "name": "Work Anywhere",
-    "value": 417
+    "value": 329
   },
   {
     "id": "app_d9589ab005e18dcf362d2ea26aef669e",
     "name": "Cash Pay",
-    "value": 408
+    "value": 327
+  },
+  {
+    "id": "app_d39e81fc66701c189d994c849235b4fc",
+    "name": "Rolu",
+    "value": 325
   },
   {
     "id": "app_20f47ee14e340581dd64d34e0dfa04f3",
     "name": "Got Vision",
-    "value": 395
+    "value": 316
   },
   {
     "id": "app_5b5a1a91da5ddb972a86d1f740ad895c",
     "name": "Craftt Pass",
-    "value": 355
+    "value": 312
   },
   {
     "id": "app_0792f77a8eb28e2e67d06a078f7174c6",
     "name": "Neon Ball Sort",
-    "value": 329
-  },
-  {
-    "id": "app_4bd03ac1074bcfd0e1f2febb1dad40dc",
-    "name": "Human Choice",
-    "value": 327
-  },
-  {
-    "id": "app_82fc7befa2f1c7689ec1a9ed441f6226",
-    "name": "Tarot AI",
-    "value": 325
-  },
-  {
-    "id": "app_1b38371371d91bee1ca90bf7aab1da60",
-    "name": "Gusta",
-    "value": 316
-  },
-  {
-    "id": "app_cfd0a40d70419e3675be53a0aa9b7e10",
-    "name": "Magnify Cash",
-    "value": 312
-  },
-  {
-    "id": "app_f61d803c22350091058a3ee2e9e09fa8",
-    "name": "InfinityAI",
     "value": 305
   }
 ]
