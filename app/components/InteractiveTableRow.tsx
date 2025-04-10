@@ -133,12 +133,12 @@ export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
                   {app.total_users_all_time.toLocaleString()}
                 </span>
               </div>
-              {/* <div className="flex justify-between">
+              <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Reward</span>
                 <span className="text-sm font-medium text-gray-900">
                   {app.reward.toLocaleString()}
                 </span>
-              </div> */}
+              </div>
               <button
                 onClick={handleTryItOut}
                 className="w-full mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
