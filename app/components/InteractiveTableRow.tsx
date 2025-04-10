@@ -94,9 +94,9 @@ export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
         <td className="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 text-right text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap align-middle">
           {app.total_users_all_time.toLocaleString()}
         </td>
-        {/* <td className="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 text-right text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap align-middle">
+        <td className="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 text-right text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap align-middle">
           {app.reward.toLocaleString()}
-        </td> */}
+        </td>
       </tr>
 
       {/* Mobile expanded details */}
