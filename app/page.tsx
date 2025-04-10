@@ -63,9 +63,12 @@ async function getData(): Promise<AppData[]> {
       fetch("https://metrics.worldcoin.org/miniapps/stats/data.json", {
         next: { revalidate: 3600 },
       }),
-      fetch("https://world-id-assets.com/api/v2/public/apps", {
-        next: { revalidate: 3600 },
-      }),
+      fetch(
+        "https://world-id-assets.com/api/v2/public/apps?override_country=AR",
+        {
+          next: { revalidate: 3600 },
+        }
+      ),
     ]);
 
     if (!metricsRes.ok || !appsRes.ok) {
