@@ -6,6 +6,7 @@ export interface AppData {
   unique_users_all_time: number;
   total_users_7d: number;
   total_users_all_time: number;
+  reward: number;
 }
 
 export interface TopApp {
@@ -32,5 +33,6 @@ export type SortField =
   | "unique_users_7d"
   | "unique_users_all_time"
   | "total_users_7d"
-  | "total_users_all_time";
+  | "total_users_all_time"
+  | "reward";
 export type SortDirection = "asc" | "desc";

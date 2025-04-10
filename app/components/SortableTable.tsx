@@ -110,6 +110,13 @@ export function SortableTable({
               currentDirection={sortDirection}
               className="hidden sm:table-cell"
             />
+            {/* <SortHeader
+              label="Wave 1 Reward"
+              field="reward"
+              currentSort={sortField}
+              currentDirection={sortDirection}
+              className="hidden sm:table-cell"
+            /> */}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
