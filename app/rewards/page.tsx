@@ -4,13 +4,13 @@ import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Mini Apps Statistics",
-    description: "Analytics dashboard for World App Mini Apps",
+    title: "Mini Apps Rewards",
+    description: "Rewards for World App Mini Apps",
     openGraph: {
       images: [
         {
-          url: "https://www.miniapps.world/api/screenshot?pathname=/rewards",
-          alt: "Mini Apps Stats Preview",
+          url: "https://www.miniapps.world/api/screenshot?pathname=rewards",
+          alt: "Mini Apps Rewards Preview",
           width: 1200,
           height: 630,
         },
