@@ -79,7 +79,7 @@ async function getData(): Promise<AppData[]> {
     const metricsData: MetricsResponse[] = await metricsRes.json();
     const missingAppData = extraAppsIds.map(async (appId) => {
       const result = await fetch(
-        `https://world-id-assets.com/api/v2/public/app/${appId}`,
+        `https://world-id-assets.com/api/v2/public/app/${appId}?skip_country_check=true`,
         {
           next: { revalidate: 3600 },
         }
