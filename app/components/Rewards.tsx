@@ -248,7 +248,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
               </span>
             </div>
             <div className="text-sm text-gray-500 mt-1">
-              Total rewards distributed across all waves
+              Total rewards distributed across all weeks
             </div>
           </div>
         </div>
@@ -263,14 +263,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   App
                 </th>
                 <SortHeader
-                  label="Wave 1 Reward"
+                  label="Week 1 Reward"
                   field="wave1"
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave1")}
                 />
                 <SortHeader
-                  label="Wave 2 Reward"
+                  label="Week 2 Reward"
                   field="wave2"
                   currentSort={sort}
                   currentDirection={direction}
