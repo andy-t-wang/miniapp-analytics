@@ -13,7 +13,7 @@ export default async function RewardsPageWrapper() {
   };
   const metadata = await fetchAppsMetadata();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div></div>}>
       <RewardsPage metadata={metadata.app_rankings.top_apps} />
     </Suspense>
   );
