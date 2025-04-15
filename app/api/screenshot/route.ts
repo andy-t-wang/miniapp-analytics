@@ -9,7 +9,9 @@ export async function GET(request: Request) {
 
     // Get the base URL from the request
     const url = new URL(request.url);
-    const baseUrl = `${url.protocol}//${url.host}`;
+    const searchParams = new URLSearchParams(url.search);
+    const pathname = searchParams.get("pathname") || "";
+    const baseUrl = `${url.protocol}//${url.host}/${pathname}`;
     console.log("Taking screenshot of:", baseUrl);
 
     const { data } = await mql(baseUrl, {

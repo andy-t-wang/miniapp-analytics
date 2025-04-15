@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       images: [
         {
-          url: "https://www.miniapps.world/api/screenshot",
+          url: "https://www.miniapps.world/api/screenshot?pathname=/rewards",
           alt: "Mini Apps Stats Preview",
           width: 1200,
           height: 630,
