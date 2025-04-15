@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import RewardsPage from "../components/Rewards";
 
 export default async function RewardsPageWrapper() {
@@ -11,5 +12,9 @@ export default async function RewardsPageWrapper() {
     return appsMetadata.json();
   };
   const metadata = await fetchAppsMetadata();
-  return <RewardsPage metadata={metadata.app_rankings.top_apps} />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RewardsPage metadata={metadata.app_rankings.top_apps} />
+    </Suspense>
+  );
 }
