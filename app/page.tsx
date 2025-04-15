@@ -14,6 +14,7 @@ import {
   AnalyticsWrapper,
 } from "./components/AnalyticsWrapper";
 import grantsData from "../public/grants1.json";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -186,7 +187,7 @@ export default async function Home({
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-8">
-              <a href="https://world.org/ecosystem" className="flex-shrink-0">
+              <Link href="/" className="flex-shrink-0">
                 <Image
                   src="/world_logo.svg"
                   alt="World Logo"
@@ -195,10 +196,19 @@ export default async function Home({
                   className="h-6 w-auto"
                   priority
                 />
-              </a>
-              <h1 className="text-xl max-sm:hidden font-medium text-gray-900">
+              </Link>
+              <Link
+                href="/"
+                className="text-xl max-sm:hidden font-medium text-gray-900"
+              >
                 Summary
-              </h1>
+              </Link>
+              <Link
+                href="/rewards"
+                className="text-xl max-sm:hidden font-medium text-gray-900"
+              >
+                Rewards
+              </Link>
             </div>
             <AnalyticsWrapper>
               <SearchField />

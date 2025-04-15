@@ -29,6 +29,14 @@ export interface MetricsResponse {
   total_users: number;
 }
 
+export interface RewardsTableRow {
+  app_id: string;
+  name: string;
+  logo_img_url: string;
+  wave1: number;
+  wave2: number;
+}
+
 export type SortField =
   | "unique_users_7d"
   | "unique_users_all_time"
