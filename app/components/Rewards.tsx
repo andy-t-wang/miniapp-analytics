@@ -153,20 +153,28 @@ function RewardsTableRowComponent({
             {" "}
             {/* Increased py */}
             {/* Adjust indentation based on App column: pl-3 (12px) + w-8 (32px) + gap-3 (12px) = 56px */}
-            <div className="pl-[56px] space-y-1">
+            <div className="sm:pl-[56px] space-y-1">
               {" "}
               {/* Add space between lines */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center w-full">
                 {" "}
                 {/* Flex layout for Week 1 */}
-                <span className="font-medium text-gray-600">Week 1:</span>
-                <span>{row.wave1.toLocaleString()} WLD</span>
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 1:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave1.toLocaleString()} WLD
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 {" "}
                 {/* Flex layout for Week 2 */}
-                <span className="font-medium text-gray-600">Week 2:</span>
-                <span>{row.wave2.toLocaleString()} WLD</span>
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 2:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave2.toLocaleString()} WLD
+                </span>
               </div>
             </div>
           </td>
