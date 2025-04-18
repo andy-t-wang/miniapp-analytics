@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RewardsPageWrapper() {
   const fetchAppsMetadata = async () => {
     const appsMetadata = await fetch(
-      "https://world-id-assets.com/api/v2/public/apps?override_country=AR",
+      "https://world-id-assets.com/api/v2/public/apps?override_country=AR&skip_cloudfront_check=true",
       {
         next: { revalidate: 3600 },
       }

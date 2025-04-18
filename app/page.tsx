@@ -65,7 +65,7 @@ async function getData(): Promise<AppData[]> {
         next: { revalidate: 3600 },
       }),
       fetch(
-        "https://world-id-assets.com/api/v2/public/apps?override_country=AR",
+        "https://world-id-assets.com/api/v2/public/apps?override_country=AR&skip_cloudfront_check=true",
         {
           next: { revalidate: 3600 },
         }
@@ -79,7 +79,7 @@ async function getData(): Promise<AppData[]> {
     const metricsData: MetricsResponse[] = await metricsRes.json();
     const missingAppData = extraAppsIds.map(async (appId) => {
       const result = await fetch(
-        `https://world-id-assets.com/api/v2/public/app/${appId}?override_country=AR`,
+        `https://world-id-assets.com/api/v2/public/app/${appId}?override_country=AR&skip_cloudfront_check=true`,
         {
           next: { revalidate: 3600 },
         }
