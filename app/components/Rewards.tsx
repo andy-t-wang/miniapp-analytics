@@ -7,7 +7,7 @@ import { AppData, RewardsTableRow } from "../types";
 import grants1 from "../../public/grants1.json";
 import grants2 from "../../public/grants2.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
@@ -92,40 +92,87 @@ function SortHeader({
 function RewardsTableRowComponent({
   row,
   index,
+  isExpanded,
+  onToggle,
 }: {
   row: RewardsTableRow;
   index: number;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <tr className="hover:bg-gray-50 transition-colors cursor-pointer group">
-      <td className="pl-3 sm:pl-6 pr-2 sm:pr-4 py-3 sm:py-4 text-sm text-gray-500 align-middle">
-        {index + 1}
-      </td>
-      <td className="px-3 sm:px-6 py-3 sm:py-4 align-middle">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-            <Image
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
-              src={row.logo_img_url}
-              alt={row.name}
-              width={40}
-              height={40}
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm sm:text-base font-medium text-gray-900 group-hover:text-blue-600">
-              {row.name}
+    <>
+      <tr
+        className="hover:bg-gray-50 transition-colors cursor-pointer group"
+        onClick={onToggle}
+      >
+        <td className="pl-3 pr-2 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell">
+          {index + 1}
+        </td>
+        <td className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+              <Image
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                src={row.logo_img_url}
+                alt={row.name}
+                width={40}
+                height={40}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900 group-hover:text-blue-600">
+                {row.name}
+              </div>
             </div>
           </div>
-        </div>
-      </td>
-      <td className="px-3 sm:px-6 py-3 sm:py-4 text-right text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-20 sm:w-auto">
-        {row.wave1.toLocaleString()}
-      </td>
-      <td className="px-3 sm:px-6 py-3 sm:py-4 text-right text-sm sm:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-20 sm:w-auto">
-        {row.wave2.toLocaleString()}
-      </td>
-    </tr>
+        </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave1.toLocaleString()}
+        </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave2.toLocaleString()}
+        </td>
+        {/* Shown only on mobile */}
+        <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
+          {(row.wave1 + row.wave2).toLocaleString()}
+        </td>
+      </tr>
+      {/* Conditionally rendered details row for mobile */}
+      {isExpanded && (
+        <tr className="sm:hidden bg-gray-50">
+          {" "}
+          {/* Detail row only on mobile */}
+          {/* Span 2 columns: App + Total Rewards column */}
+          <td
+            colSpan={2}
+            className="px-3 py-3 text-xs text-gray-700 border-t border-gray-200"
+          >
+            {" "}
+            {/* Increased py */}
+            {/* Adjust indentation based on App column: pl-3 (12px) + w-8 (32px) + gap-3 (12px) = 56px */}
+            <div className="pl-[56px] space-y-1">
+              {" "}
+              {/* Add space between lines */}
+              <div className="flex justify-between items-center">
+                {" "}
+                {/* Flex layout for Week 1 */}
+                <span className="font-medium text-gray-600">Week 1:</span>
+                <span>{row.wave1.toLocaleString()} WLD</span>
+              </div>
+              <div className="flex justify-between items-center">
+                {" "}
+                {/* Flex layout for Week 2 */}
+                <span className="font-medium text-gray-600">Week 2:</span>
+                <span>{row.wave2.toLocaleString()} WLD</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -133,6 +180,9 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+
+  // State for expanded rows
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const sort = searchParams.get("sort") || "wave1";
   const direction = searchParams.get("direction") || "desc";
@@ -160,6 +210,19 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
     params.set("direction", nextDirection);
     router.replace(`${pathname}?${params.toString()}`);
   }
+
+  // Function to toggle row expansion
+  const toggleRowExpansion = (app_id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(app_id)) {
+        next.delete(app_id);
+      } else {
+        next.add(app_id);
+      }
+      return next;
+    });
+  };
 
   // Calculate rewards summary
   const totalWave2 = data.reduce((sum, app) => sum + app.wave2, 0);
@@ -256,26 +319,37 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           <table className="min-w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="pl-3 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                <th className="pl-3 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8 hidden sm:table-cell">
                   #
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   App
                 </th>
+                {/* Hidden on mobile, shown sm and up */}
                 <SortHeader
                   label="Week 1 Reward"
                   field="wave1"
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave1")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
                 />
+                {/* Hidden on mobile, shown sm and up */}
                 <SortHeader
                   label="Week 2 Reward"
                   field="wave2"
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave2")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
                 />
+                {/* Shown only on mobile */}
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
+                >
+                  Total Rewards
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -284,6 +358,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   key={row.app_id}
                   row={row}
                   index={i}
+                  isExpanded={expandedRows.has(row.app_id)}
+                  onToggle={() => toggleRowExpansion(row.app_id)}
                 />
               ))}
             </tbody>
