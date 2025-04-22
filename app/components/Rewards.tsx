@@ -13,61 +13,77 @@ import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
 function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
-  // Create a map for wave 2 rewards
-  const wave2Map = new Map<string, { name: string; value: number }>(
-    grants2.map((g) => [g.id, { name: g.name, value: g.value }])
-  );
-  const wave3Map = new Map<string, { name: string; value: number }>(
-    grants3.map((g) => [g.id, { name: g.name, value: g.value }])
-  );
+  const allApps = new Map<string, RewardsTableRow>();
 
-  // Merge wave 1 and wave 2 by app id and wave 3
-  const rows: RewardsTableRow[] = grants1.map((g1) => {
-    const wave2 = wave2Map.get(g1.id);
-    const wave3 = wave3Map.get(g1.id);
-    return {
+  // Process grants1
+  for (const g1 of grants1) {
+    allApps.set(g1.id, {
       app_id: g1.id,
       name: g1.name,
       wave1: g1.value,
-      wave2: wave2 ? wave2.value : 0,
-      wave3: wave3 ? wave3.value : 0,
-      logo_img_url:
-        appsMetadataData?.find((app: AppData) => app.app_id === g1.id)
-          ?.logo_img_url || "",
-    };
-  });
+      wave2: 0,
+      wave3: 0,
+      logo_img_url: "", // Will be populated later
+    });
+  }
 
-  // Add any apps that are only in wave 2
+  // Process grants2
   for (const g2 of grants2) {
-    if (!rows.find((r) => r.app_id === g2.id)) {
-      rows.push({
+    const existingApp = allApps.get(g2.id);
+    if (existingApp) {
+      existingApp.wave2 = g2.value;
+      // Update name if necessary, though grants should be consistent
+      // existingApp.name = g2.name;
+    } else {
+      // Add app if it only exists in wave 2 onwards
+      allApps.set(g2.id, {
         app_id: g2.id,
         name: g2.name,
         wave1: 0,
         wave2: g2.value,
         wave3: 0,
-        logo_img_url:
-          appsMetadataData?.find((app: AppData) => app.app_id === g2.id)
-            ?.logo_img_url || "",
+        logo_img_url: "",
       });
     }
   }
 
-  // Add any apps that are only in wave 3
+  // Process grants3
   for (const g3 of grants3) {
-    if (!rows.find((r) => r.app_id === g3.id)) {
-      rows.push({
+    const existingApp = allApps.get(g3.id);
+    if (existingApp) {
+      existingApp.wave3 = g3.value;
+      // Update name if necessary
+      // existingApp.name = g3.name;
+    } else {
+      // Add app if it only exists in wave 3
+      allApps.set(g3.id, {
         app_id: g3.id,
         name: g3.name,
         wave1: 0,
-        wave2: 0,
+        wave2: 0, // Initialize wave 2 correctly
         wave3: g3.value,
-        logo_img_url:
-          appsMetadataData?.find((app: AppData) => app.app_id === g3.id)
-            ?.logo_img_url || "",
+        logo_img_url: "",
       });
     }
   }
+
+  // Populate logo URLs from metadata
+  if (appsMetadataData) {
+    for (const appMeta of appsMetadataData) {
+      const appData = allApps.get(appMeta.app_id);
+      if (appData) {
+        appData.logo_img_url = appMeta.logo_img_url || "";
+      }
+      // Optional: Add apps from metadata that might not be in grants?
+      // else {
+      //   allApps.set(appMeta.app_id, { ... create new entry ... });
+      // }
+    }
+  }
+
+  // Convert map values to the final array
+  const rows = Array.from(allApps.values());
+
   return rows;
 }
 
@@ -236,8 +252,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
     const sorted = [...base].sort((a, b) => {
       const multiplier = direction === "asc" ? 1 : -1;
       return (
-        ((a[sort as "wave1" | "wave2"] || 0) -
-          (b[sort as "wave1" | "wave2"] || 0)) *
+        ((a[sort as "wave1" | "wave2" | "wave3"] || 0) -
+          (b[sort as "wave1" | "wave2" | "wave3"] || 0)) *
         multiplier
       );
     });
