@@ -6,6 +6,7 @@ import { PageViewTracker } from "../components/AnalyticsWrapper";
 import { AppData, RewardsTableRow } from "../types";
 import grants1 from "../../public/grants1.json";
 import grants2 from "../../public/grants2.json";
+import grants3 from "../../public/grants3.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -16,15 +17,20 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
   const wave2Map = new Map<string, { name: string; value: number }>(
     grants2.map((g) => [g.id, { name: g.name, value: g.value }])
   );
+  const wave3Map = new Map<string, { name: string; value: number }>(
+    grants3.map((g) => [g.id, { name: g.name, value: g.value }])
+  );
 
-  // Merge wave 1 and wave 2 by app id
+  // Merge wave 1 and wave 2 by app id and wave 3
   const rows: RewardsTableRow[] = grants1.map((g1) => {
     const wave2 = wave2Map.get(g1.id);
+    const wave3 = wave3Map.get(g1.id);
     return {
       app_id: g1.id,
       name: g1.name,
       wave1: g1.value,
       wave2: wave2 ? wave2.value : 0,
+      wave3: wave3 ? wave3.value : 0,
       logo_img_url:
         appsMetadataData?.find((app: AppData) => app.app_id === g1.id)
           ?.logo_img_url || "",
@@ -39,6 +45,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         name: g2.name,
         wave1: 0,
         wave2: g2.value,
+        wave3: 0,
         logo_img_url:
           appsMetadataData?.find((app: AppData) => app.app_id === g2.id)
             ?.logo_img_url || "",
@@ -46,6 +53,21 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
     }
   }
 
+  // Add any apps that are only in wave 3
+  for (const g3 of grants3) {
+    if (!rows.find((r) => r.app_id === g3.id)) {
+      rows.push({
+        app_id: g3.id,
+        name: g3.name,
+        wave1: 0,
+        wave2: 0,
+        wave3: g3.value,
+        logo_img_url:
+          appsMetadataData?.find((app: AppData) => app.app_id === g3.id)
+            ?.logo_img_url || "",
+      });
+    }
+  }
   return rows;
 }
 
@@ -58,7 +80,7 @@ function SortHeader({
   onClick,
 }: {
   label: React.ReactNode;
-  field: "wave1" | "wave2";
+  field: "wave1" | "wave2" | "wave3";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -135,9 +157,13 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave2.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave3.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-          {(row.wave1 + row.wave2).toLocaleString()}
+          {(row.wave1 + row.wave2 + row.wave3).toLocaleString()}
         </td>
       </tr>
       {/* Conditionally rendered details row for mobile */}
@@ -176,6 +202,16 @@ function RewardsTableRowComponent({
                   {row.wave2.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {" "}
+                {/* Flex layout for Week 3 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 3:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave3.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -208,7 +244,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
     return sorted;
   }, [sort, direction, metadata]);
 
-  function handleSort(field: "wave1" | "wave2") {
+  function handleSort(field: "wave1" | "wave2" | "wave3") {
     let nextDirection = "desc";
     if (sort === field) {
       nextDirection = direction === "desc" ? "asc" : "desc";
@@ -233,9 +269,9 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const totalWave2 = data.reduce((sum, app) => sum + app.wave2, 0);
+  const totalWave3 = data.reduce((sum, app) => sum + app.wave3, 0);
   const totalAllTime = data.reduce(
-    (sum, app) => sum + app.wave1 + app.wave2,
+    (sum, app) => sum + app.wave1 + app.wave2 + app.wave3,
     0
   );
 
@@ -293,7 +329,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   height={28}
                   className="inline-block"
                 />
-                {totalWave2.toLocaleString()}
+                {totalWave3.toLocaleString()}
               </span>
             </div>
             <div className="text-sm text-gray-500 mt-1">
@@ -349,6 +385,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave2")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 3 Reward"
+                  field="wave3"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave3")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}

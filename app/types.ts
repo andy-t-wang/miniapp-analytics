@@ -35,6 +35,7 @@ export interface RewardsTableRow {
   logo_img_url: string;
   wave1: number;
   wave2: number;
+  wave3: number;
 }
 
 export type SortField =
