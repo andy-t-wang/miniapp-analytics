@@ -36,6 +36,7 @@ export interface RewardsTableRow {
   wave1: number;
   wave2: number;
   wave3: number;
+  wave4: number;
 }
 
 export type SortField =

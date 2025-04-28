@@ -7,6 +7,7 @@ import { AppData, RewardsTableRow } from "../types";
 import grants1 from "../../public/grants1.json";
 import grants2 from "../../public/grants2.json";
 import grants3 from "../../public/grants3.json";
+import grants4 from "../../public/grants4.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -23,6 +24,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave1: g1.value,
       wave2: 0,
       wave3: 0,
+      wave4: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -42,6 +44,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave1: 0,
         wave2: g2.value,
         wave3: 0,
+        wave4: 0,
         logo_img_url: "",
       });
     }
@@ -62,8 +65,28 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave1: 0,
         wave2: 0, // Initialize wave 2 correctly
         wave3: g3.value,
+        wave4: 0,
         logo_img_url: "",
       });
+    }
+
+    // Process grants4
+    for (const g4 of grants4) {
+      const existingApp = allApps.get(g4.id);
+      if (existingApp) {
+        existingApp.wave4 = g4.value;
+      } else {
+        // Add app if it only exists in wave 4
+        allApps.set(g4.id, {
+          app_id: g4.id,
+          name: g4.name,
+          wave1: 0,
+          wave2: 0,
+          wave3: 0,
+          wave4: g4.value,
+          logo_img_url: "",
+        });
+      }
     }
   }
 
@@ -96,7 +119,7 @@ function SortHeader({
   onClick,
 }: {
   label: React.ReactNode;
-  field: "wave1" | "wave2" | "wave3";
+  field: "wave1" | "wave2" | "wave3" | "wave4";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -177,9 +200,13 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave3.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave4.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-          {(row.wave1 + row.wave2 + row.wave3).toLocaleString()}
+          {(row.wave1 + row.wave2 + row.wave3 + row.wave4).toLocaleString()}
         </td>
       </tr>
       {/* Conditionally rendered details row for mobile */}
@@ -228,6 +255,16 @@ function RewardsTableRowComponent({
                   {row.wave3.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {" "}
+                {/* Flex layout for Week 4 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 4:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave4.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -252,15 +289,15 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
     const sorted = [...base].sort((a, b) => {
       const multiplier = direction === "asc" ? 1 : -1;
       return (
-        ((a[sort as "wave1" | "wave2" | "wave3"] || 0) -
-          (b[sort as "wave1" | "wave2" | "wave3"] || 0)) *
+        ((a[sort as "wave1" | "wave2" | "wave3" | "wave4"] || 0) -
+          (b[sort as "wave1" | "wave2" | "wave3" | "wave4"] || 0)) *
         multiplier
       );
     });
     return sorted;
   }, [sort, direction, metadata]);
 
-  function handleSort(field: "wave1" | "wave2" | "wave3") {
+  function handleSort(field: "wave1" | "wave2" | "wave3" | "wave4") {
     let nextDirection = "desc";
     if (sort === field) {
       nextDirection = direction === "desc" ? "asc" : "desc";
@@ -285,9 +322,9 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const totalWave3 = data.reduce((sum, app) => sum + app.wave3, 0);
+  const weekTotal = data.reduce((sum, app) => sum + app.wave4, 0);
   const totalAllTime = data.reduce(
-    (sum, app) => sum + app.wave1 + app.wave2 + app.wave3,
+    (sum, app) => sum + app.wave1 + app.wave2 + app.wave3 + app.wave4,
     0
   );
 
@@ -345,7 +382,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   height={28}
                   className="inline-block"
                 />
-                {totalWave3.toLocaleString()}
+                {weekTotal.toLocaleString()}
               </span>
             </div>
             <div className="text-sm text-gray-500 mt-1">
@@ -409,6 +446,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave3")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 4 Reward"
+                  field="wave4"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave4")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}
