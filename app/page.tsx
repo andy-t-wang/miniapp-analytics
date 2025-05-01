@@ -65,7 +65,7 @@ async function getData(): Promise<AppData[]> {
         next: { revalidate: 3600 },
       }),
       fetch(
-        "https://world-id-assets.com/api/v2/public/apps?override_country=AR&skip_country_check=true",
+        "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
         {
           next: { revalidate: 3600 },
         }
