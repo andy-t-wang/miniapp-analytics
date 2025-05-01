@@ -33,30 +33,30 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const extraAppsIds = [
-  "app_cfd0a40d70419e3675be53a0aa9b7e10", // Magnify
-  "app_97fc3debb3591a461c6ab3a16930a4e6", // VAKANOPAGA
-  "app_321c526e5d6a0c623f4681f43d1d67ea", // Dantio
-  "app_8e73a5bbe52ee0fa527232b8fc670b32", // Plus
-  "app_219941bc349cf4454e5c0e7e2bd6e38d", // Yuplon
-  "app_f73cb56512aad21cd3c294c90dd06d4f", // WLD a ARS
-  "app_4fb840c976a27c63f533ed24a1b0e25f", // Bueno Cambio
-  "app_e4a7e1fafd7c43097627703ffba2cddb", // Terminal
-  "app_d495f6bf966aaa33ce54ebcc6d9a0162", // Loyall
-  "app_5d1477356f63c8b82ea29e35a091e02f", // Coupon hub
-  "app_703f53588423565c8929f3cda0c95cb0", // Money Caex
-  "app_4c4610d7d45eb20f9804c9365a5a836b", // Gluers People
-  "app_17add0ea360017d9ed307f8913dd4a0e", // Flights
-  "app_d29cf8cfeea14e69f286af1803e296d2", // Flojo
-  "app_8e5d3717d3babb59bd16948c9ff8397f", // Services
-  "app_6610def1aa8897c77963bb43e747c4e2", // Phone Top ups
-  "app_7308a0530a5bab5db92e19d7dd9616dc", // WLD a BRL
-  "app_dc6fa1d96aba2b6ea25f81724789e0bc", // Futures
-  "app_f76fd2f3959c6fe28a487914f610918b", // + Cash
-  "app_133132cc57e61f3fd71351b72c35b641", // Super walk
-  "app_375429e9ed395410c54243b2379c4281", // CB Wallet
-  "app_ef009d364436334a4ba836d16e4f5e40", // Deals
-];
+// const extraAppsIds = [
+//   "app_cfd0a40d70419e3675be53a0aa9b7e10", // Magnify
+//   "app_97fc3debb3591a461c6ab3a16930a4e6", // VAKANOPAGA
+//   "app_321c526e5d6a0c623f4681f43d1d67ea", // Dantio
+//   "app_8e73a5bbe52ee0fa527232b8fc670b32", // Plus
+//   "app_219941bc349cf4454e5c0e7e2bd6e38d", // Yuplon
+//   "app_f73cb56512aad21cd3c294c90dd06d4f", // WLD a ARS
+//   "app_4fb840c976a27c63f533ed24a1b0e25f", // Bueno Cambio
+//   "app_e4a7e1fafd7c43097627703ffba2cddb", // Terminal
+//   "app_d495f6bf966aaa33ce54ebcc6d9a0162", // Loyall
+//   "app_5d1477356f63c8b82ea29e35a091e02f", // Coupon hub
+//   "app_703f53588423565c8929f3cda0c95cb0", // Money Caex
+//   "app_4c4610d7d45eb20f9804c9365a5a836b", // Gluers People
+//   "app_17add0ea360017d9ed307f8913dd4a0e", // Flights
+//   "app_d29cf8cfeea14e69f286af1803e296d2", // Flojo
+//   "app_8e5d3717d3babb59bd16948c9ff8397f", // Services
+//   "app_6610def1aa8897c77963bb43e747c4e2", // Phone Top ups
+//   "app_7308a0530a5bab5db92e19d7dd9616dc", // WLD a BRL
+//   "app_dc6fa1d96aba2b6ea25f81724789e0bc", // Futures
+//   "app_f76fd2f3959c6fe28a487914f610918b", // + Cash
+//   "app_133132cc57e61f3fd71351b72c35b641", // Super walk
+//   "app_375429e9ed395410c54243b2379c4281", // CB Wallet
+//   "app_ef009d364436334a4ba836d16e4f5e40", // Deals
+// ];
 
 async function getData(): Promise<AppData[]> {
   try {
@@ -65,7 +65,7 @@ async function getData(): Promise<AppData[]> {
         next: { revalidate: 3600 },
       }),
       fetch(
-        "https://world-id-assets.com/api/v2/public/apps?override_country=AR&skip_cloudfront_check=true",
+        "https://world-id-assets.com/api/v2/public/apps?override_country=AR&skip_country_check=true",
         {
           next: { revalidate: 3600 },
         }
@@ -77,23 +77,23 @@ async function getData(): Promise<AppData[]> {
     }
 
     const metricsData: MetricsResponse[] = await metricsRes.json();
-    const missingAppData = extraAppsIds.map(async (appId) => {
-      const result = await fetch(
-        `https://world-id-assets.com/api/v2/public/app/${appId}?override_country=AR&skip_cloudfront_check=true`,
-        {
-          next: { revalidate: 3600 },
-        }
-      );
-      const data = await result.json();
-      return data.app_data;
-    });
+    // const missingAppData = extraAppsIds.map(async (appId) => {
+    //   const result = await fetch(
+    //     `https://world-id-assets.com/api/v2/public/app/${appId}?override_country=AR&skip_country_check=true`,
+    //     {
+    //       next: { revalidate: 3600 },
+    //     }
+    //   );
+    //   const data = await result.json();
+    //   return data.app_data;
+    // });
 
-    const missingAppDataData = await Promise.all(missingAppData);
+    // const missingAppDataData = await Promise.all(missingAppData);
     const appsData: ApiResponse = {
       app_rankings: {
         top_apps: [
           ...(await appsRes.json()).app_rankings.top_apps,
-          ...missingAppDataData,
+          // ...missingAppDataData,
         ],
       },
     };
