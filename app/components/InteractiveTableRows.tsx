@@ -51,7 +51,7 @@ export function InteractiveTableRows({ apps }: InteractiveTableRowsProps) {
                 <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
                   <Image
                     className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover"
-                    src={app.logo_img_url}
+                    src={app.logo_img_url || "/world_logo.svg"}
                     alt={app.name}
                     width={40}
                     height={40}

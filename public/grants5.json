@@ -1,0 +1,312 @@
+[
+  {
+    "id": "app_f1e44837a5e3c2af4da8925b46027645",
+    "name": "ORO",
+    "value": 3674
+  },
+  {
+    "id": "app_66c83ab8c851fb1e54b1b1b62c6ce39d",
+    "name": "World Republic",
+    "value": 2843
+  },
+  {
+    "id": "app_a4f7f3e62c1de0b9490a5260cb390b56",
+    "name": "UNO",
+    "value": 2779
+  },
+  {
+    "id": "app_ee968e983074cb090e6f12cd75b63bb3",
+    "name": "Eggs Vault",
+    "value": 1640
+  },
+  {
+    "id": "app_baf6d315fd5f8f277f5e954e035aecd4",
+    "name": "EARN ASADO",
+    "value": 1304
+  },
+  {
+    "id": "app_f12d676b28252ffa1937a3453590e078",
+    "name": "Cash Daily",
+    "value": 1015
+  },
+  {
+    "id": "app_49fe40f83cfcdf67b7ba716d37e927e4",
+    "name": "Cash Convert",
+    "value": 968
+  },
+  {
+    "id": "app_8e407cfbae7ae51c19b07faff837aeeb",
+    "name": "DNA",
+    "value": 900
+  },
+  {
+    "id": "app_0d4b759921490adc1f2bd569fda9b53a",
+    "name": "Holdstation Wallet",
+    "value": 846
+  },
+  {
+    "id": "app_c895e94c9c7d2ab9899b6083ad95e31d",
+    "name": "Worldle",
+    "value": 690
+  },
+  {
+    "id": "app_b67c3e1ab1f44f3533b234a53d5a156d",
+    "name": "THE BOX",
+    "value": 673
+  },
+  {
+    "id": "app_3876b5f39809a50bb5ebe97c997bbcf1",
+    "name": "ORB",
+    "value": 673
+  },
+  {
+    "id": "app_ec193da56e4e39b91afe72c2b3a6a09b",
+    "name": "Golden Otter Hub",
+    "value": 568
+  },
+  {
+    "id": "app_15daccf5b7d4ec9b7dbba044a8fdeab5",
+    "name": "PUF",
+    "value": 550
+  },
+  {
+    "id": "app_fa653bbd0e1a4c36aff0e2812876759e",
+    "name": "Cash Earn",
+    "value": 525
+  },
+  {
+    "id": "app_8aeb55d57b7be834fb8d67e2f803d258",
+    "name": "AXO",
+    "value": 512
+  },
+  {
+    "id": "app_8d09da48ea47a1345a82138c9ef720e2",
+    "name": "World Billboard",
+    "value": 471
+  },
+  {
+    "id": "app_e126da43ad6b19b387c260afeea26470",
+    "name": "Golden Otter Maze Game",
+    "value": 467
+  },
+  {
+    "id": "app_7cf6a578c65c4b7db84bc6734fb0e165",
+    "name": "DNA Wallet",
+    "value": 446
+  },
+  {
+    "id": "app_795c0423db679ccd64020b91558e0abe",
+    "name": "EarnOS",
+    "value": 442
+  },
+  {
+    "id": "app_44016c399a6c3fb33c454ef2bd19897a",
+    "name": "Humans vs AI",
+    "value": 435
+  },
+  {
+    "id": "app_90f83f92ae19202a0b776b9ad68e0864",
+    "name": "O＝C＝O",
+    "value": 400
+  },
+  {
+    "id": "app_8c63022b2b60500c57128b005eb349a8",
+    "name": "GalAxo",
+    "value": 384
+  },
+  {
+    "id": "app_3150e69d62ae2aa760e84b871e286dd2",
+    "name": "Cat Boss Meow Adventure",
+    "value": 356
+  },
+  {
+    "id": "app_ebdd8475db3238254fca5b25ccba266a",
+    "name": "Credit - Up to $100-dollar loans",
+    "value": 356
+  },
+  {
+    "id": "app_40cf4a75c0ac4d247999bccb1ce8f857",
+    "name": "Human Tap",
+    "value": 0
+  },
+  {
+    "id": "app_a3a55e132983350c67923dd57dc22c5e",
+    "name": "TPulseFi",
+    "value": 0
+  },
+  {
+    "id": "app_32b99ba4a53b339620c89f24f8062125",
+    "name": "Bit Master",
+    "value": 0
+  },
+  {
+    "id": "app_dc38d1977f23660f332458e0c1ca7b58",
+    "name": "Superhero",
+    "value": 0
+  },
+  {
+    "id": "app_5dee2f19cd6eef599eb6ab275a0a7523",
+    "name": "Sage",
+    "value": 0
+  },
+  {
+    "id": "app_bd741f81dc7e30a9286ce8e3d4c4a39f",
+    "name": "SuperCat",
+    "value": 0
+  },
+  {
+    "id": "app_22aab9b718f16cb32505b5df816f65f5",
+    "name": "King of the World",
+    "value": 0
+  },
+  {
+    "id": "app_523d41b3715a1c0138ffe1794851df36",
+    "name": "The Button",
+    "value": 0
+  },
+  {
+    "id": "app_d39e81fc66701c189d994c849235b4fc",
+    "name": "Rolu",
+    "value": 0
+  },
+  {
+    "id": "app_04be5c0d2752633311de641688a4c72b",
+    "name": "Squadleticss",
+    "value": 0
+  },
+  {
+    "id": "app_33b2058421d1a9fe1f6a9cc0cc5b8b03",
+    "name": "Crypto merge",
+    "value": 0
+  },
+  {
+    "id": "app_d9589ab005e18dcf362d2ea26aef669e",
+    "name": "Cash Pay",
+    "value": 0
+  },
+  {
+    "id": "app_4bd03ac1074bcfd0e1f2febb1dad40dc",
+    "name": "Human Choice",
+    "value": 0
+  },
+  {
+    "id": "app_9fe9b198f2959d1bb745f81e972e23e6",
+    "name": "Work Anywhere",
+    "value": 0
+  },
+  {
+    "id": "app_0792f77a8eb28e2e67d06a078f7174c6",
+    "name": "Neon Ball Sort",
+    "value": 0
+  },
+  {
+    "id": "app_fa8974b2c77a879724c770556d4a9451",
+    "name": "WorldScore",
+    "value": 0
+  },
+  {
+    "id": "app_5b5a1a91da5ddb972a86d1f740ad895c",
+    "name": "Craftt Pass",
+    "value": 0
+  },
+  {
+    "id": "app_57ec63d0c443fc364adb84c46791d044",
+    "name": "Pet the Cat",
+    "value": 0
+  },
+  {
+    "id": "app_20f47ee14e340581dd64d34e0dfa04f3",
+    "name": "Got Vision",
+    "value": 0
+  },
+  {
+    "id": "app_d3e071b5b413374ea3dcc0765a1020ee",
+    "name": "Blanq Wallet",
+    "value": 0
+  },
+  {
+    "id": "app_2643ee14e4743e05ae17aac5534c7e7c",
+    "name": "Jobs For Humans",
+    "value": 0
+  },
+  {
+    "id": "app_82fc7befa2f1c7689ec1a9ed441f6226",
+    "name": "Tarot AI",
+    "value": 0
+  },
+  {
+    "id": "app_f76fd2f3959c6fe28a487914f610918b",
+    "name": "(+)Cash",
+    "value": 0
+  },
+  {
+    "id": "app_6f33254bc5e69dd5cf9999317a5721f7",
+    "name": "MindVault",
+    "value": 0
+  },
+  {
+    "id": "app_404318eb5e6e97937a40b17c890f1ea3",
+    "name": "Melorize: AI Music",
+    "value": 0
+  },
+  {
+    "id": "app_9872915a7a53ef9915cceb646a5cf06d",
+    "name": "Meritt",
+    "value": 0
+  },
+  {
+    "id": "app_cfd0a40d70419e3675be53a0aa9b7e10",
+    "name": "Magnify Cash",
+    "value": 0
+  },
+  {
+    "id": "app_ec7ce79e582a7aff416f5b3298cd7a56",
+    "name": "VideoGenio: AI Videos",
+    "value": 0
+  },
+  {
+    "id": "app_a01bf4b7b47315f64e6d29de9cf6f2f3",
+    "name": "OfflineID",
+    "value": 0
+  },
+  {
+    "id": "app_f61d803c22350091058a3ee2e9e09fa8",
+    "name": "InfinityAI",
+    "value": 0
+  },
+  {
+    "id": "app_c223728f049eaaf844bf4107ae81b808",
+    "name": "Cardify: Personalized AI Cards",
+    "value": 0
+  },
+  {
+    "id": "app_7501e98d4a93d6a49aee9336d71788de",
+    "name": "Picturra AI: Transform Your Photos",
+    "value": 0
+  },
+  {
+    "id": "app_2248679d8f07eb1b7eacd922f9a26a1e",
+    "name": "ORBITAL-X",
+    "value": 0
+  },
+  {
+    "id": "app_a1a7fb139d05d20c50af7ba30b453f91",
+    "name": "Uman",
+    "value": 0
+  },
+  {
+    "id": "app_d4bce4c056d0cb5ec84c62c6729a66a8",
+    "name": "DNA GenomeX",
+    "value": 0
+  },
+  {
+    "id": "app_14667489aa3b47eff9937c45aafa3988",
+    "name": "AskHumans",
+    "value": 0
+  },
+  {
+    "id": "app_821e7b27df790d0da742c58230d93499",
+    "name": "Aliyas Awakening Mini-Games",
+    "value": 0
+  }
+]

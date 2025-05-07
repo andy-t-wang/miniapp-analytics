@@ -8,6 +8,7 @@ import grants1 from "../../public/grants1.json";
 import grants2 from "../../public/grants2.json";
 import grants3 from "../../public/grants3.json";
 import grants4 from "../../public/grants4.json";
+import grants5 from "../../public/grants5.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -25,6 +26,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave2: 0,
       wave3: 0,
       wave4: 0,
+      wave5: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -45,6 +47,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave2: g2.value,
         wave3: 0,
         wave4: 0,
+        wave5: 0,
         logo_img_url: "",
       });
     }
@@ -66,6 +69,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave2: 0, // Initialize wave 2 correctly
         wave3: g3.value,
         wave4: 0,
+        wave5: 0,
         logo_img_url: "",
       });
     }
@@ -84,6 +88,27 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave2: 0,
           wave3: 0,
           wave4: g4.value,
+          wave5: 0,
+          logo_img_url: "",
+        });
+      }
+    }
+
+    // Process grants5
+    for (const g5 of grants5) {
+      const existingApp = allApps.get(g5.id);
+      if (existingApp) {
+        existingApp.wave5 = g5.value;
+      } else {
+        // Add app if it only exists in wave 5
+        allApps.set(g5.id, {
+          app_id: g5.id,
+          name: g5.name,
+          wave1: 0,
+          wave2: 0,
+          wave3: 0,
+          wave4: 0,
+          wave5: g5.value,
           logo_img_url: "",
         });
       }
@@ -119,7 +144,7 @@ function SortHeader({
   onClick,
 }: {
   label: React.ReactNode;
-  field: "wave1" | "wave2" | "wave3" | "wave4";
+  field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -204,9 +229,19 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave4.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave5.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-          {(row.wave1 + row.wave2 + row.wave3 + row.wave4).toLocaleString()}
+          {(
+            row.wave1 +
+            row.wave2 +
+            row.wave3 +
+            row.wave4 +
+            row.wave5
+          ).toLocaleString()}
         </td>
       </tr>
       {/* Conditionally rendered details row for mobile */}
@@ -265,6 +300,16 @@ function RewardsTableRowComponent({
                   {row.wave4.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {" "}
+                {/* Flex layout for Week 5 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 5:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave5.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -281,7 +326,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   // State for expanded rows
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const sort = searchParams.get("sort") || "wave1";
+  const sort = searchParams.get("sort") || "wave5";
   const direction = searchParams.get("direction") || "desc";
 
   const data = useMemo(() => {
@@ -289,15 +334,15 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
     const sorted = [...base].sort((a, b) => {
       const multiplier = direction === "asc" ? 1 : -1;
       return (
-        ((a[sort as "wave1" | "wave2" | "wave3" | "wave4"] || 0) -
-          (b[sort as "wave1" | "wave2" | "wave3" | "wave4"] || 0)) *
+        ((a[sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5"] || 0) -
+          (b[sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5"] || 0)) *
         multiplier
       );
     });
     return sorted;
   }, [sort, direction, metadata]);
 
-  function handleSort(field: "wave1" | "wave2" | "wave3" | "wave4") {
+  function handleSort(field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5") {
     let nextDirection = "desc";
     if (sort === field) {
       nextDirection = direction === "desc" ? "asc" : "desc";
@@ -454,6 +499,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave4")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 5 Reward"
+                  field="wave5"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave5")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}
