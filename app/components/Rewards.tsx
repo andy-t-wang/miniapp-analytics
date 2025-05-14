@@ -9,6 +9,7 @@ import grants2 from "../../public/grants2.json";
 import grants3 from "../../public/grants3.json";
 import grants4 from "../../public/grants4.json";
 import grants5 from "../../public/grants5.json";
+import grants6 from "../../public/grants6.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -27,6 +28,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave3: 0,
       wave4: 0,
       wave5: 0,
+      wave6: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -48,6 +50,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave3: 0,
         wave4: 0,
         wave5: 0,
+        wave6: 0,
         logo_img_url: "",
       });
     }
@@ -70,6 +73,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave3: g3.value,
         wave4: 0,
         wave5: 0,
+        wave6: 0,
         logo_img_url: "",
       });
     }
@@ -89,6 +93,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave3: 0,
           wave4: g4.value,
           wave5: 0,
+          wave6: 0,
           logo_img_url: "",
         });
       }
@@ -109,6 +114,28 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave3: 0,
           wave4: 0,
           wave5: g5.value,
+          wave6: 0,
+          logo_img_url: "",
+        });
+      }
+    }
+
+    // Process grants6
+    for (const g6 of grants6) {
+      const existingApp = allApps.get(g6.id);
+      if (existingApp) {
+        existingApp.wave6 = g6.value;
+      } else {
+        // Add app if it only exists in wave 6
+        allApps.set(g6.id, {
+          app_id: g6.id,
+          name: g6.name,
+          wave1: 0,
+          wave2: 0,
+          wave3: 0,
+          wave4: 0,
+          wave5: 0,
+          wave6: g6.value,
           logo_img_url: "",
         });
       }
@@ -144,7 +171,7 @@ function SortHeader({
   onClick,
 }: {
   label: React.ReactNode;
-  field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5";
+  field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -233,6 +260,10 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave5.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave6.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
           {(
@@ -240,28 +271,25 @@ function RewardsTableRowComponent({
             row.wave2 +
             row.wave3 +
             row.wave4 +
-            row.wave5
+            row.wave5 +
+            row.wave6
           ).toLocaleString()}
         </td>
       </tr>
       {/* Conditionally rendered details row for mobile */}
       {isExpanded && (
         <tr className="sm:hidden bg-gray-50">
-          {" "}
           {/* Detail row only on mobile */}
           {/* Span 2 columns: App + Total Rewards column */}
           <td
             colSpan={2}
             className="px-3 py-3 text-xs text-gray-700 border-t border-gray-200"
           >
-            {" "}
             {/* Increased py */}
             {/* Adjust indentation based on App column: pl-3 (12px) + w-8 (32px) + gap-3 (12px) = 56px */}
             <div className="sm:pl-[56px] space-y-1">
-              {" "}
               {/* Add space between lines */}
               <div className="flex justify-between items-center w-full">
-                {" "}
                 {/* Flex layout for Week 1 */}
                 <span className="font-medium text-gray-600 text-sm">
                   Week 1:
@@ -271,7 +299,6 @@ function RewardsTableRowComponent({
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                {" "}
                 {/* Flex layout for Week 2 */}
                 <span className="font-medium text-gray-600 text-sm">
                   Week 2:
@@ -281,7 +308,6 @@ function RewardsTableRowComponent({
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                {" "}
                 {/* Flex layout for Week 3 */}
                 <span className="font-medium text-gray-600 text-sm">
                   Week 3:
@@ -291,7 +317,6 @@ function RewardsTableRowComponent({
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                {" "}
                 {/* Flex layout for Week 4 */}
                 <span className="font-medium text-gray-600 text-sm">
                   Week 4:
@@ -301,13 +326,21 @@ function RewardsTableRowComponent({
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                {" "}
                 {/* Flex layout for Week 5 */}
                 <span className="font-medium text-gray-600 text-sm">
                   Week 5:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
                   {row.wave5.toLocaleString()} WLD
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                {/* Flex layout for Week 6 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 6:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave6.toLocaleString()} WLD
                 </span>
               </div>
             </div>
@@ -334,15 +367,21 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
     const sorted = [...base].sort((a, b) => {
       const multiplier = direction === "asc" ? 1 : -1;
       return (
-        ((a[sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5"] || 0) -
-          (b[sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5"] || 0)) *
+        ((a[
+          sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6"
+        ] || 0) -
+          (b[
+            sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6"
+          ] || 0)) *
         multiplier
       );
     });
     return sorted;
   }, [sort, direction, metadata]);
 
-  function handleSort(field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5") {
+  function handleSort(
+    field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6"
+  ) {
     let nextDirection = "desc";
     if (sort === field) {
       nextDirection = direction === "desc" ? "asc" : "desc";
@@ -367,9 +406,16 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const weekTotal = data.reduce((sum, app) => sum + app.wave4, 0);
+  const weekTotal = data.reduce((sum, app) => sum + app.wave6, 0);
   const totalAllTime = data.reduce(
-    (sum, app) => sum + app.wave1 + app.wave2 + app.wave3 + app.wave4,
+    (sum, app) =>
+      sum +
+      app.wave1 +
+      app.wave2 +
+      app.wave3 +
+      app.wave4 +
+      app.wave5 +
+      app.wave6,
     0
   );
 
@@ -509,6 +555,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   onClick={() => handleSort("wave5")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
+                <SortHeader
+                  label="Week 6 Reward"
+                  field="wave6"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave6")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
                 {/* Shown only on mobile */}
                 <th
                   scope="col"
@@ -532,7 +586,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           </table>
         </div>
         <div className="mt-4 text-center text-sm text-gray-500">
-          Data from World Foundation • Last loaded:{" "}
+          Data from World Foundation • Last loaded:
           {(() => {
             const now = new Date();
             now.setMinutes(0, 0, 0); // round to nearest hour (down)
