@@ -10,6 +10,7 @@ import grants3 from "../../public/grants3.json";
 import grants4 from "../../public/grants4.json";
 import grants5 from "../../public/grants5.json";
 import grants6 from "../../public/grants6.json";
+import grants7 from "../../public/grants7.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -29,6 +30,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave4: 0,
       wave5: 0,
       wave6: 0,
+      wave7: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -51,6 +53,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave4: 0,
         wave5: 0,
         wave6: 0,
+        wave7: 0,
         logo_img_url: "",
       });
     }
@@ -74,6 +77,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave4: 0,
         wave5: 0,
         wave6: 0,
+        wave7: 0,
         logo_img_url: "",
       });
     }
@@ -94,6 +98,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave4: g4.value,
           wave5: 0,
           wave6: 0,
+          wave7: 0,
           logo_img_url: "",
         });
       }
@@ -115,6 +120,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave4: 0,
           wave5: g5.value,
           wave6: 0,
+          wave7: 0,
           logo_img_url: "",
         });
       }
@@ -136,6 +142,29 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave4: 0,
           wave5: 0,
           wave6: g6.value,
+          wave7: 0,
+          logo_img_url: "",
+        });
+      }
+    }
+
+    // Process grants7
+    for (const g7 of grants7) {
+      const existingApp = allApps.get(g7.id);
+      if (existingApp) {
+        existingApp.wave7 = g7.value;
+      } else {
+        // Add app if it only exists in wave 7
+        allApps.set(g7.id, {
+          app_id: g7.id,
+          name: g7.name,
+          wave1: 0,
+          wave2: 0,
+          wave3: 0,
+          wave4: 0,
+          wave5: 0,
+          wave6: 0,
+          wave7: g7.value,
           logo_img_url: "",
         });
       }
@@ -171,7 +200,7 @@ function SortHeader({
   onClick,
 }: {
   label: React.ReactNode;
-  field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6";
+  field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6" | "wave7";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -219,10 +248,10 @@ function RewardsTableRowComponent({
         className="hover:bg-gray-50 transition-colors cursor-pointer group"
         onClick={onToggle}
       >
-        <td className="pl-3 pr-2 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell">
+        <td className="pl-3 pr-2 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell sm:w-12 sticky left-0 z-10 bg-white">
           {index + 1}
         </td>
-        <td className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle">
+        <td className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky sm:left-12 left-0 z-10 bg-white">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
               <Image
@@ -264,6 +293,11 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave6.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave7.toLocaleString()}
+        </td>
+
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
           {(
@@ -272,7 +306,8 @@ function RewardsTableRowComponent({
             row.wave3 +
             row.wave4 +
             row.wave5 +
-            row.wave6
+            row.wave6 +
+            row.wave7
           ).toLocaleString()}
         </td>
       </tr>
@@ -343,6 +378,15 @@ function RewardsTableRowComponent({
                   {row.wave6.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {/* Flex layout for Week 7 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 7:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave7.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -368,10 +412,24 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       const multiplier = direction === "asc" ? 1 : -1;
       return (
         ((a[
-          sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6"
+          sort as
+            | "wave1"
+            | "wave2"
+            | "wave3"
+            | "wave4"
+            | "wave5"
+            | "wave6"
+            | "wave7"
         ] || 0) -
           (b[
-            sort as "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6"
+            sort as
+              | "wave1"
+              | "wave2"
+              | "wave3"
+              | "wave4"
+              | "wave5"
+              | "wave6"
+              | "wave7"
           ] || 0)) *
         multiplier
       );
@@ -380,7 +438,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   }, [sort, direction, metadata]);
 
   function handleSort(
-    field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6"
+    field: "wave1" | "wave2" | "wave3" | "wave4" | "wave5" | "wave6" | "wave7"
   ) {
     let nextDirection = "desc";
     if (sort === field) {
@@ -406,7 +464,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const weekTotal = data.reduce((sum, app) => sum + app.wave6, 0);
+  const weekTotal = data.reduce((sum, app) => sum + app.wave7, 0);
   const totalAllTime = data.reduce(
     (sum, app) =>
       sum +
@@ -415,7 +473,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       app.wave3 +
       app.wave4 +
       app.wave5 +
-      app.wave6,
+      app.wave6 +
+      app.wave7,
     0
   );
 
@@ -507,10 +566,10 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           <table className="min-w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="pl-3 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8 hidden sm:table-cell">
+                <th className="pl-3 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 hidden sm:table-cell sticky left-0 z-20 bg-white">
                   #
                 </th>
-                <th className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky sm:left-12 left-0 z-20 bg-white">
                   App
                 </th>
                 {/* Hidden on mobile, shown sm and up */}
@@ -561,6 +620,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave6")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 7 Reward"
+                  field="wave7"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave7")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}
