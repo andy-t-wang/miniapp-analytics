@@ -1,5 +1,13 @@
-import puppeteer from "puppeteer";
+import React from "react";
 import { NextResponse } from "next/server";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  pdf,
+} from "@react-pdf/renderer";
 
 // Define types for the app data
 interface AppData {
@@ -23,148 +31,81 @@ interface ApiResponse {
   };
 }
 
-// Generate HTML content for PDF
-const generateHTML = (data: CleanedAppData[]): string => {
-  const tableRows = data
-    .map(
-      (row) => `
-    <tr>
-      <td>${row.name}</td>
-      <td class="url-cell">${row.url}</td>
-      <td>${row.team}</td>
-    </tr>
-  `
-    )
-    .join("");
-
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>iOS Apps Report</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 20px;
-          color: #333;
-        }
-        
-        h1 {
-          color: #2c3e50;
-          text-align: center;
-          margin-bottom: 30px;
-          font-size: 24px;
-        }
-        
-        .summary {
-          background-color: #f8f9fa;
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 30px;
-          text-align: center;
-        }
-        
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 0 auto;
-          background-color: white;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        th {
-          background-color: #3498db;
-          color: white;
-          padding: 12px 8px;
-          text-align: left;
-          font-weight: bold;
-          border-bottom: 2px solid #2980b9;
-        }
-        
-        td {
-          padding: 10px 8px;
-          border-bottom: 1px solid #ecf0f1;
-          vertical-align: top;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #f8f9fa;
-        }
-        
-        tr:hover {
-          background-color: #e8f4fd;
-        }
-        
-        .url-cell {
-          word-break: break-all;
-          font-size: 10px;
-          color: #7f8c8d;
-          max-width: 200px;
-        }
-        
-        .footer {
-          margin-top: 30px;
-          text-align: center;
-          font-size: 12px;
-          color: #7f8c8d;
-        }
-      </style>
-    </head>
-    <body>
-      <h1>iOS Apps Report</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>App Name</th>
-            <th>URL</th>
-            <th>Team</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
-      </table>
-    </body>
-    </html>
-  `;
-};
-
-// Generate PDF and return as buffer
-async function generatePDF(data: CleanedAppData[]): Promise<Uint8Array> {
-  console.log("Launching browser...");
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"], // For deployment environments
-  });
-
-  try {
-    const page = await browser.newPage();
-
-    // Set the HTML content
-    const htmlContent = generateHTML(data);
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-
-    console.log("Generating PDF...");
-
-    // Generate PDF as buffer
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      margin: {
-        top: "20px",
-        right: "20px",
-        bottom: "20px",
-        left: "20px",
-      },
-      printBackground: true,
-    });
-
-    console.log("PDF generated successfully");
-    return pdfBuffer;
-  } finally {
-    await browser.close();
-  }
-}
+// Define styles for the PDF
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "column",
+    backgroundColor: "#ffffff",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    textAlign: "center",
+    marginBottom: 30,
+    color: "#2c3e50",
+    fontWeight: "bold",
+  },
+  summary: {
+    backgroundColor: "#f8f9fa",
+    padding: 15,
+    marginBottom: 30,
+    textAlign: "center",
+    fontSize: 12,
+    color: "#333",
+  },
+  table: {
+    display: "flex",
+    width: "100%",
+    flexDirection: "column",
+    borderWidth: 1,
+    borderColor: "#ecf0f1",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#3498db",
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 12,
+    padding: 8,
+  },
+  tableHeaderCell: {
+    flex: 1,
+    textAlign: "left",
+    padding: 4,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ecf0f1",
+    minHeight: 30,
+    fontSize: 10,
+  },
+  tableRowEven: {
+    backgroundColor: "#f8f9fa",
+  },
+  tableCell: {
+    flex: 1,
+    padding: 8,
+    textAlign: "left",
+    fontSize: 10,
+  },
+  urlCell: {
+    flex: 2,
+    padding: 8,
+    textAlign: "left",
+    fontSize: 8,
+    color: "#7f8c8d",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    right: 20,
+    textAlign: "center",
+    fontSize: 10,
+    color: "#7f8c8d",
+  },
+});
 
 export async function GET() {
   try {
@@ -192,8 +133,107 @@ export async function GET() {
 
     console.log(`Found ${ios_apps_cleaned.length} iOS apps`);
 
-    // Generate PDF
-    const pdfBuffer = await generatePDF(ios_apps_cleaned);
+    // Generate PDF using @react-pdf/renderer
+    console.log("Generating PDF...");
+    const pdfDoc = React.createElement(
+      Document,
+      null,
+      React.createElement(
+        Page,
+        { size: "A4", style: styles.page },
+        React.createElement(Text, { style: styles.title }, "iOS Apps Report"),
+        React.createElement(
+          View,
+          { style: styles.summary },
+          React.createElement(
+            Text,
+            null,
+            `Total iOS Apps: ${ios_apps_cleaned.length}`
+          )
+        ),
+        React.createElement(
+          View,
+          { style: styles.table },
+          // Table Header
+          React.createElement(
+            View,
+            { style: styles.tableHeader },
+            React.createElement(
+              Text,
+              { style: [styles.tableHeaderCell, { flex: 2 }] },
+              "App Name"
+            ),
+            React.createElement(
+              Text,
+              { style: [styles.tableHeaderCell, { flex: 3 }] },
+              "URL"
+            ),
+            React.createElement(
+              Text,
+              { style: [styles.tableHeaderCell, { flex: 2 }] },
+              "Team"
+            )
+          ),
+          // Table Rows
+          ...ios_apps_cleaned.map((app, index) =>
+            React.createElement(
+              View,
+              {
+                key: app.app_id,
+                style: [
+                  styles.tableRow,
+                  index % 2 === 1 ? styles.tableRowEven : {},
+                ],
+              },
+              React.createElement(
+                Text,
+                { style: [styles.tableCell, { flex: 2 }] },
+                app.name
+              ),
+              React.createElement(
+                Text,
+                { style: [styles.urlCell, { flex: 3 }] },
+                app.url
+              ),
+              React.createElement(
+                Text,
+                { style: [styles.tableCell, { flex: 2 }] },
+                app.team
+              )
+            )
+          )
+        ),
+        React.createElement(
+          Text,
+          { style: styles.footer },
+          `Generated on ${new Date().toLocaleDateString()}`
+        )
+      )
+    );
+
+    const pdfInstance = pdf(pdfDoc);
+
+    // Get the ReadableStream from toBuffer()
+    const stream = await pdfInstance.toBuffer();
+
+    // Convert ReadableStream to Buffer
+    const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+      const chunks: Uint8Array[] = [];
+
+      stream.on("data", (chunk: Uint8Array) => {
+        chunks.push(chunk);
+      });
+
+      stream.on("end", () => {
+        resolve(Buffer.concat(chunks));
+      });
+
+      stream.on("error", (error: Error) => {
+        reject(error);
+      });
+    });
+
+    console.log("PDF generated successfully");
 
     // Return PDF as downloadable file
     return new NextResponse(pdfBuffer, {
