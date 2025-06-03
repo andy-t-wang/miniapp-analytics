@@ -12,6 +12,7 @@ import grants5 from "../../public/grants5.json";
 import grants6 from "../../public/grants6.json";
 import grants7 from "../../public/grants7.json";
 import grants8 from "../../public/grants8.json";
+import grants9 from "../../public/grants9.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -33,6 +34,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave6: 0,
       wave7: 0,
       wave8: 0,
+      wave9: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -57,6 +59,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave6: 0,
         wave7: 0,
         wave8: 0,
+        wave9: 0,
         logo_img_url: "",
       });
     }
@@ -82,6 +85,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave6: 0,
         wave7: 0,
         wave8: 0,
+        wave9: 0,
         logo_img_url: "",
       });
     }
@@ -104,6 +108,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave6: 0,
           wave7: 0,
           wave8: 0,
+          wave9: 0,
           logo_img_url: "",
         });
       }
@@ -127,6 +132,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave6: 0,
           wave7: 0,
           wave8: 0,
+          wave9: 0,
           logo_img_url: "",
         });
       }
@@ -150,6 +156,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave6: g6.value,
           wave7: 0,
           wave8: 0,
+          wave9: 0,
           logo_img_url: "",
         });
       }
@@ -173,6 +180,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave6: 0,
           wave7: g7.value,
           wave8: 0,
+          wave9: 0,
           logo_img_url: "",
         });
       }
@@ -196,6 +204,31 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave6: 0,
           wave7: 0,
           wave8: g8.value,
+          wave9: 0,
+          logo_img_url: "",
+        });
+      }
+    }
+
+    // Process grants9
+    for (const g9 of grants9) {
+      const existingApp = allApps.get(g9.id);
+      if (existingApp) {
+        existingApp.wave9 = g9.value;
+      } else {
+        // Add app if it only exists in wave 9
+        allApps.set(g9.id, {
+          app_id: g9.id,
+          name: g9.name,
+          wave1: 0,
+          wave2: 0,
+          wave3: 0,
+          wave4: 0,
+          wave5: 0,
+          wave6: 0,
+          wave7: 0,
+          wave8: 0,
+          wave9: g9.value,
           logo_img_url: "",
         });
       }
@@ -209,10 +242,6 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       if (appData) {
         appData.logo_img_url = appMeta.logo_img_url || "";
       }
-      // Optional: Add apps from metadata that might not be in grants?
-      // else {
-      //   allApps.set(appMeta.app_id, { ... create new entry ... });
-      // }
     }
   }
 
@@ -239,7 +268,8 @@ function SortHeader({
     | "wave5"
     | "wave6"
     | "wave7"
-    | "wave8";
+    | "wave8"
+    | "wave9";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -340,6 +370,10 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave8.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave9.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
           {(
@@ -350,7 +384,8 @@ function RewardsTableRowComponent({
             row.wave5 +
             row.wave6 +
             row.wave7 +
-            row.wave8
+            row.wave8 +
+            row.wave9
           ).toLocaleString()}
         </td>
       </tr>
@@ -439,6 +474,15 @@ function RewardsTableRowComponent({
                   {row.wave8.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {/* Flex layout for Week 9 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 9:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave9.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -455,7 +499,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   // State for expanded rows
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const sort = searchParams.get("sort") || "wave5";
+  const sort = searchParams.get("sort") || "wave9";
   const direction = searchParams.get("direction") || "desc";
 
   const data = useMemo(() => {
@@ -473,6 +517,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
             | "wave6"
             | "wave7"
             | "wave8"
+            | "wave9"
         ] || 0) -
           (b[
             sort as
@@ -484,6 +529,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
               | "wave6"
               | "wave7"
               | "wave8"
+              | "wave9"
           ] || 0)) *
         multiplier
       );
@@ -501,6 +547,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       | "wave6"
       | "wave7"
       | "wave8"
+      | "wave9"
   ) {
     let nextDirection = "desc";
     if (sort === field) {
@@ -526,7 +573,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const weekTotal = data.reduce((sum, app) => sum + app.wave7, 0);
+  const weekTotal = data.reduce((sum, app) => sum + app.wave9, 0);
   const totalAllTime = data.reduce(
     (sum, app) =>
       sum +
@@ -537,7 +584,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       app.wave5 +
       app.wave6 +
       app.wave7 +
-      app.wave8,
+      app.wave8 +
+      app.wave9,
     0
   );
 
@@ -699,6 +747,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave8")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 9 Reward"
+                  field="wave9"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave9")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}
