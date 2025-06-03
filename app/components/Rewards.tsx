@@ -317,10 +317,10 @@ function RewardsTableRowComponent({
         className="hover:bg-gray-50 transition-colors cursor-pointer group"
         onClick={onToggle}
       >
-        <td className="pl-3 pr-2 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell sm:w-12 sticky left-0 z-10 bg-white hover:bg-gray-50">
+        <td className="pl-3 pr-0 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-12 sticky left-0 z-20 bg-white group-hover:bg-gray-50">
           {index + 1}
         </td>
-        <td className="sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky sm:left-12 left-0 z-10 bg-white hover:bg-gray-50">
+        <td className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-12 z-20 bg-white group-hover:bg-gray-50 min-w-0">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
               <Image
@@ -396,7 +396,7 @@ function RewardsTableRowComponent({
           {/* Span 2 columns: App + Total Rewards column */}
           <td
             colSpan={2}
-            className="px-3 py-3 text-xs text-gray-700 border-t border-gray-200"
+            className="pl-3 pr-3 py-3 text-xs text-gray-700 border-t border-gray-200 relative z-10 bg-gray-50"
           >
             {/* Increased py */}
             {/* Adjust indentation based on App column: pl-3 (12px) + w-8 (32px) + gap-3 (12px) = 56px */}
@@ -677,10 +677,10 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           <table className="min-w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="pl-3 pr-2 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell sm:w-12 sticky left-0 z-10 bg-white">
+                <th className="pl-3 pr-0 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-12 sticky left-0 z-20 bg-white">
                   #
                 </th>
-                <th className="sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky text-left text-xs font-medium text-gray-500 uppercase sm:left-8 left-0 z-10 bg-white">
+                <th className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-12 z-20 bg-white text-left text-xs font-medium text-gray-500 uppercase">
                   App
                 </th>
                 {/* Hidden on mobile, shown sm and up */}
