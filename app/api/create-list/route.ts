@@ -66,12 +66,15 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontWeight: "bold",
     fontSize: 12,
-    padding: 8,
+    padding: 12,
+    minHeight: 30,
+    alignItems: "center",
   },
   tableHeaderCell: {
     flex: 1,
     textAlign: "left",
-    padding: 4,
+    padding: 8,
+    paddingVertical: 12,
   },
   tableRow: {
     flexDirection: "row",
