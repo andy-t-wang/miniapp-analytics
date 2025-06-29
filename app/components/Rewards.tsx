@@ -13,8 +13,9 @@ import grants6 from "../../public/grants6.json";
 import grants7 from "../../public/grants7.json";
 import grants8 from "../../public/grants8.json";
 import grants9 from "../../public/grants9.json";
+import grants10 from "../../public/grants10.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
@@ -35,6 +36,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave7: 0,
       wave8: 0,
       wave9: 0,
+      wave10: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -60,6 +62,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave7: 0,
         wave8: 0,
         wave9: 0,
+        wave10: 0,
         logo_img_url: "",
       });
     }
@@ -86,6 +89,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave7: 0,
         wave8: 0,
         wave9: 0,
+        wave10: 0,
         logo_img_url: "",
       });
     }
@@ -109,6 +113,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave7: 0,
           wave8: 0,
           wave9: 0,
+          wave10: 0,
           logo_img_url: "",
         });
       }
@@ -133,6 +138,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave7: 0,
           wave8: 0,
           wave9: 0,
+          wave10: 0,
           logo_img_url: "",
         });
       }
@@ -157,6 +163,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave7: 0,
           wave8: 0,
           wave9: 0,
+          wave10: 0,
           logo_img_url: "",
         });
       }
@@ -181,6 +188,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave7: g7.value,
           wave8: 0,
           wave9: 0,
+          wave10: 0,
           logo_img_url: "",
         });
       }
@@ -205,6 +213,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave7: 0,
           wave8: g8.value,
           wave9: 0,
+          wave10: 0,
           logo_img_url: "",
         });
       }
@@ -229,6 +238,32 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave7: 0,
           wave8: 0,
           wave9: g9.value,
+          wave10: 0,
+          logo_img_url: "",
+        });
+      }
+    }
+
+    // Process grants10
+    for (const g10 of grants10) {
+      const existingApp = allApps.get(g10.id);
+      if (existingApp) {
+        existingApp.wave10 = g10.value;
+      } else {
+        // Add app if it only exists in wave 10
+        allApps.set(g10.id, {
+          app_id: g10.id,
+          name: g10.name,
+          wave1: 0,
+          wave2: 0,
+          wave3: 0,
+          wave4: 0,
+          wave5: 0,
+          wave6: 0,
+          wave7: 0,
+          wave8: 0,
+          wave9: 0,
+          wave10: g10.value,
           logo_img_url: "",
         });
       }
@@ -269,7 +304,8 @@ function SortHeader({
     | "wave6"
     | "wave7"
     | "wave8"
-    | "wave9";
+    | "wave9"
+    | "wave10";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -311,25 +347,57 @@ function RewardsTableRowComponent({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  const [imageError, setImageError] = useState(false);
+  
+  const handleImageError = useCallback((e: any) => {
+    console.error(`Failed to load image for ${row.name}:`, {
+      app_id: row.app_id,
+      url: row.logo_img_url,
+      error: e,
+      note: 'Image loads directly but fails through Next.js Image optimization. Falling back to unoptimized img tag.'
+    });
+    setImageError(true);
+  }, [row.app_id, row.logo_img_url, row.name]);
   return (
     <>
       <tr
         className="hover:bg-gray-50 transition-colors cursor-pointer group"
         onClick={onToggle}
       >
-        <td className="pl-3 pr-0 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-12 sticky left-0 z-20 bg-white group-hover:bg-gray-50">
+        <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white group-hover:bg-gray-50">
           {index + 1}
         </td>
-        <td className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-12 z-20 bg-white group-hover:bg-gray-50 min-w-0">
+        <td className="relative pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white group-hover:bg-gray-50 min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:group-hover:bg-gray-50 before:-z-10">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-              <Image
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
-                src={row.logo_img_url}
-                alt={row.name}
-                width={40}
-                height={40}
-              />
+              {row.logo_img_url ? (
+                imageError ? (
+                  <img
+                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                    src={row.logo_img_url}
+                    alt={row.name}
+                    onError={() => {
+                      console.error(`Even unoptimized image failed for ${row.name}:`, row.logo_img_url);
+                    }}
+                  />
+                ) : (
+                  <Image
+                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                    src={row.logo_img_url}
+                    alt={row.name}
+                    width={40}
+                    height={40}
+                    onError={handleImageError}
+                    unoptimized={row.logo_img_url.includes('githubusercontent') || row.logo_img_url.includes('github')}
+                  />
+                )
+              ) : (
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-xs font-medium">
+                    {row.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900 group-hover:text-blue-600">
@@ -374,6 +442,10 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave9.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave10.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
           {(
@@ -385,7 +457,8 @@ function RewardsTableRowComponent({
             row.wave6 +
             row.wave7 +
             row.wave8 +
-            row.wave9
+            row.wave9 +
+            row.wave10
           ).toLocaleString()}
         </td>
       </tr>
@@ -483,6 +556,15 @@ function RewardsTableRowComponent({
                   {row.wave9.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {/* Flex layout for Week 10 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 10:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave10.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -518,6 +600,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
             | "wave7"
             | "wave8"
             | "wave9"
+            | "wave10"
         ] || 0) -
           (b[
             sort as
@@ -530,6 +613,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
               | "wave7"
               | "wave8"
               | "wave9"
+              | "wave10"
           ] || 0)) *
         multiplier
       );
@@ -548,6 +632,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       | "wave7"
       | "wave8"
       | "wave9"
+      | "wave10"
   ) {
     let nextDirection = "desc";
     if (sort === field) {
@@ -573,7 +658,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const weekTotal = data.reduce((sum, app) => sum + app.wave9, 0);
+  const weekTotal = data.reduce((sum, app) => sum + app.wave10, 0);
   const totalAllTime = data.reduce(
     (sum, app) =>
       sum +
@@ -585,7 +670,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       app.wave6 +
       app.wave7 +
       app.wave8 +
-      app.wave9,
+      app.wave9 +
+      app.wave10,
     0
   );
 
@@ -677,10 +763,10 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           <table className="min-w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="pl-3 pr-0 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-12 sticky left-0 z-20 bg-white">
+                <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
                   #
                 </th>
-                <th className="pl-3 sm:pl-6 pr-2 sm:px-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-12 z-20 bg-white text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="relative pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
                   App
                 </th>
                 {/* Hidden on mobile, shown sm and up */}
@@ -755,6 +841,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave9")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 10 Reward"
+                  field="wave10"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave10")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}
