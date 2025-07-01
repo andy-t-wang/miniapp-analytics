@@ -22,7 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RewardsPageWrapper() {
   const fetchAppsMetadata = async () => {
     const appsMetadata = await fetch(
-      "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true"
+      "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
+      {
+        next: { revalidate: 86400 }, // Every 24 hours
+      }
     );
     return appsMetadata.json();
   };
@@ -32,5 +35,5 @@ export default async function RewardsPageWrapper() {
     <Suspense fallback={<div></div>}>
       <RewardsPage metadata={metadata.app_rankings.top_apps} />
     </Suspense>
-  );
+);
 }

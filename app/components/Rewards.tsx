@@ -14,6 +14,7 @@ import grants7 from "../../public/grants7.json";
 import grants8 from "../../public/grants8.json";
 import grants9 from "../../public/grants9.json";
 import grants10 from "../../public/grants10.json";
+import grants11 from "../../public/grants11.json";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState, useCallback } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -37,6 +38,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
       wave8: 0,
       wave9: 0,
       wave10: 0,
+      wave11: 0,
       logo_img_url: "", // Will be populated later
     });
   }
@@ -63,6 +65,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave8: 0,
         wave9: 0,
         wave10: 0,
+        wave11: 0,
         logo_img_url: "",
       });
     }
@@ -90,6 +93,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
         wave8: 0,
         wave9: 0,
         wave10: 0,
+        wave11: 0,
         logo_img_url: "",
       });
     }
@@ -114,6 +118,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: 0,
           wave9: 0,
           wave10: 0,
+          wave11: 0,
           logo_img_url: "",
         });
       }
@@ -139,6 +144,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: 0,
           wave9: 0,
           wave10: 0,
+          wave11: 0,
           logo_img_url: "",
         });
       }
@@ -164,6 +170,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: 0,
           wave9: 0,
           wave10: 0,
+          wave11: 0,
           logo_img_url: "",
         });
       }
@@ -189,6 +196,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: 0,
           wave9: 0,
           wave10: 0,
+          wave11: 0,
           logo_img_url: "",
         });
       }
@@ -214,6 +222,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: g8.value,
           wave9: 0,
           wave10: 0,
+          wave11: 0,
           logo_img_url: "",
         });
       }
@@ -239,6 +248,7 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: 0,
           wave9: g9.value,
           wave10: 0,
+          wave11: 0,
           logo_img_url: "",
         });
       }
@@ -264,9 +274,36 @@ function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
           wave8: 0,
           wave9: 0,
           wave10: g10.value,
+          wave11: 0,
           logo_img_url: "",
         });
       }
+    }
+  }
+
+  // Process grants11
+  for (const g11 of grants11) {
+    const existingApp = allApps.get(g11.id);
+    if (existingApp) {
+      existingApp.wave11 = g11.value;
+    } else {
+      // Add app if it only exists in wave 11
+      allApps.set(g11.id, {
+        app_id: g11.id,
+        name: g11.name,
+        wave1: 0,
+        wave2: 0,
+        wave3: 0,
+        wave4: 0,
+        wave5: 0,
+        wave6: 0,
+        wave7: 0,
+        wave8: 0,
+        wave9: 0,
+        wave10: 0,
+        wave11: g11.value,
+        logo_img_url: "",
+      });
     }
   }
 
@@ -305,7 +342,8 @@ function SortHeader({
     | "wave7"
     | "wave8"
     | "wave9"
-    | "wave10";
+    | "wave10"
+    | "wave11";
   currentSort: string;
   currentDirection: string;
   className?: string;
@@ -348,16 +386,19 @@ function RewardsTableRowComponent({
   onToggle: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
-  
-  const handleImageError = useCallback((e: any) => {
-    console.error(`Failed to load image for ${row.name}:`, {
-      app_id: row.app_id,
-      url: row.logo_img_url,
-      error: e,
-      note: 'Image loads directly but fails through Next.js Image optimization. Falling back to unoptimized img tag.'
-    });
-    setImageError(true);
-  }, [row.app_id, row.logo_img_url, row.name]);
+
+  const handleImageError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      console.error(`Failed to load image for ${row.name}:`, {
+        app_id: row.app_id,
+        url: row.logo_img_url,
+        error: e,
+        note: "Image loads directly but fails through Next.js Image optimization. Falling back to unoptimized img tag.",
+      });
+      setImageError(true);
+    },
+    [row.app_id, row.logo_img_url, row.name]
+  );
   return (
     <>
       <tr
@@ -377,7 +418,10 @@ function RewardsTableRowComponent({
                     src={row.logo_img_url}
                     alt={row.name}
                     onError={() => {
-                      console.error(`Even unoptimized image failed for ${row.name}:`, row.logo_img_url);
+                      console.error(
+                        `Even unoptimized image failed for ${row.name}:`,
+                        row.logo_img_url
+                      );
                     }}
                   />
                 ) : (
@@ -388,7 +432,10 @@ function RewardsTableRowComponent({
                     width={40}
                     height={40}
                     onError={handleImageError}
-                    unoptimized={row.logo_img_url.includes('githubusercontent') || row.logo_img_url.includes('github')}
+                    unoptimized={
+                      row.logo_img_url.includes("githubusercontent") ||
+                      row.logo_img_url.includes("github")
+                    }
                   />
                 )
               ) : (
@@ -446,6 +493,10 @@ function RewardsTableRowComponent({
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
           {row.wave10.toLocaleString()}
         </td>
+        {/* Hidden on mobile, shown sm and up */}
+        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
+          {row.wave11.toLocaleString()}
+        </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
           {(
@@ -458,7 +509,8 @@ function RewardsTableRowComponent({
             row.wave7 +
             row.wave8 +
             row.wave9 +
-            row.wave10
+            row.wave10 +
+            row.wave11
           ).toLocaleString()}
         </td>
       </tr>
@@ -565,6 +617,15 @@ function RewardsTableRowComponent({
                   {row.wave10.toLocaleString()} WLD
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                {/* Flex layout for Week 11 */}
+                <span className="font-medium text-gray-600 text-sm">
+                  Week 11:
+                </span>
+                <span className="text-sm font-medium text-gray-900">
+                  {row.wave11.toLocaleString()} WLD
+                </span>
+              </div>
             </div>
           </td>
         </tr>
@@ -581,7 +642,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   // State for expanded rows
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const sort = searchParams.get("sort") || "wave9";
+  const sort = searchParams.get("sort") || "wave11";
   const direction = searchParams.get("direction") || "desc";
 
   const data = useMemo(() => {
@@ -633,6 +694,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       | "wave8"
       | "wave9"
       | "wave10"
+      | "wave11"
   ) {
     let nextDirection = "desc";
     if (sort === field) {
@@ -658,7 +720,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const weekTotal = data.reduce((sum, app) => sum + app.wave10, 0);
+  const weekTotal = data.reduce((sum, app) => sum + app.wave11, 0);
   const totalAllTime = data.reduce(
     (sum, app) =>
       sum +
@@ -671,7 +733,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
       app.wave7 +
       app.wave8 +
       app.wave9 +
-      app.wave10,
+      app.wave10 +
+      app.wave11,
     0
   );
 
@@ -849,6 +912,14 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   currentSort={sort}
                   currentDirection={direction}
                   onClick={() => handleSort("wave10")}
+                  className="px-2 sm:px-3 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Week 11 Reward"
+                  field="wave11"
+                  currentSort={sort}
+                  currentDirection={direction}
+                  onClick={() => handleSort("wave11")}
                   className="px-2 sm:px-3 hidden sm:table-cell"
                 />
                 {/* Shown only on mobile */}
