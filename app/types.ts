@@ -23,11 +23,16 @@ export interface ApiResponse {
 
 export interface MetricsResponse {
   app_id: string;
-  unique_users_last_7_days: number;
+  unique_users_last_7_days: CountryData[];
   unique_users: number;
-  total_users_last_7_days: number;
+  total_users_last_7_days: CountryData[];
   total_users: number;
 }
+
+export type CountryData = {
+  country: string;
+  value: number;
+};
 
 export interface RewardsTableRow {
   app_id: string;

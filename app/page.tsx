@@ -62,7 +62,7 @@ async function getData(): Promise<AppData[]> {
   try {
     const [metricsRes, appsRes] = await Promise.all([
       fetch("https://metrics.worldcoin.org/miniapps/stats/data.json", {
-        next: { revalidate: 3600 },
+        // next: { revalidate: 3600 },
       }),
       fetch(
         "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
@@ -107,9 +107,15 @@ async function getData(): Promise<AppData[]> {
           app_id: metrics.app_id,
           name: appInfo.name,
           logo_img_url: appInfo.logo_img_url,
-          unique_users_7d: metrics.unique_users_last_7_days || 0,
+          unique_users_7d: metrics.unique_users_last_7_days.reduce(
+            (sum, country) => sum + country.value,
+            0
+          ),
           unique_users_all_time: metrics.unique_users || 0,
-          total_users_7d: metrics.total_users_last_7_days || 0,
+          total_users_7d: metrics.total_users_last_7_days.reduce(
+            (sum, country) => sum + country.value,
+            0
+          ),
           total_users_all_time: metrics.total_users || 0,
           reward: typeof reward === "number" ? reward : 0,
         });
