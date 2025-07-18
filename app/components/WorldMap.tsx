@@ -357,7 +357,7 @@ export default function WorldMap({
   );
 
   return (
-    <div className="relative bg-white">
+    <div className="relative bg-white touch-pan-x touch-pan-y touch-pinch-zoom">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
@@ -366,9 +366,22 @@ export default function WorldMap({
         }}
         width={1000}
         height={400}
-        style={{ width: "100%", height: "400px", maxWidth: "100%" }}
+        style={{ 
+          width: "100%", 
+          height: "100%", 
+          maxWidth: "100%",
+          minHeight: "300px"
+        }}
       >
-        <ZoomableGroup zoom={1}>
+        <ZoomableGroup 
+          zoom={1}
+          minZoom={0.5}
+          maxZoom={8}
+          filterZoomEvent={(evt) => {
+            // Allow all zoom events including touch gestures
+            return true;
+          }}
+        >
           <Geographies geography={geoUrl}>
             {({ geographies }: { geographies: GeographyFeature[] }) => {
               const sanctionedCountries = ["CN", "RU"];
@@ -450,17 +463,17 @@ export default function WorldMap({
       </ComposableMap>
 
       {hoveredCountry && countryData.get(hoveredCountry) && (
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 pointer-events-none border border-gray-200">
-          <div className="font-medium text-gray-900">
+        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-white rounded-lg shadow-lg p-2 sm:p-3 pointer-events-none border border-gray-200 max-w-xs">
+          <div className="font-medium text-gray-900 text-sm sm:text-base">
             {hoveredCountryName ||
               countryData.get(hoveredCountry)!.name ||
               hoveredCountry}
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-xs sm:text-sm text-gray-600">
             {countryData.get(hoveredCountry)!.unique.toLocaleString()} unique
             users
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-xs sm:text-sm text-gray-600">
             {countryData.get(hoveredCountry)!.total.toLocaleString()} total
             opens
           </div>

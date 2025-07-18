@@ -217,9 +217,7 @@ async function getData(): Promise<{
 }> {
   try {
     const [metricsRes, appsRes] = await Promise.all([
-      fetch("https://metrics.worldcoin.org/miniapps/stats/data.json", {
-        // next: { revalidate: 3600 },
-      }),
+      fetch("https://metrics.worldcoin.org/miniapps/stats/data.json", {}),
       fetch(
         "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
         {
@@ -255,100 +253,106 @@ async function getData(): Promise<{
       if (!appInfo) return;
 
       // Process unique users by country
-      metric.unique_users_last_7_days.forEach((countryData) => {
-        // Skip sanctioned countries
-        if (sanctionedCountries.includes(countryData.country)) return;
+      if (Array.isArray(metric.unique_users_last_7_days)) {
+        metric.unique_users_last_7_days.forEach((countryData) => {
+          // Skip sanctioned countries
+          if (sanctionedCountries.includes(countryData.country)) return;
 
-        if (!countryDataMap.has(countryData.country)) {
-          countryDataMap.set(countryData.country, {
-            country: countryData.country,
-            topAppsByUniqueUsers: [],
-            topAppsByNewUsers: [],
-            topAppsByTotalUsers: [],
-          });
-          countryMetricsMap.set(countryData.country, {
-            unique: 0,
-            new: 0,
-            total: 0,
-            name: getCountryName(countryData.country),
-          });
-        }
+          if (!countryDataMap.has(countryData.country)) {
+            countryDataMap.set(countryData.country, {
+              country: countryData.country,
+              topAppsByUniqueUsers: [],
+              topAppsByNewUsers: [],
+              topAppsByTotalUsers: [],
+            });
+            countryMetricsMap.set(countryData.country, {
+              unique: 0,
+              new: 0,
+              total: 0,
+              name: getCountryName(countryData.country),
+            });
+          }
 
-        const countryRank = countryDataMap.get(countryData.country)!;
-        countryRank.topAppsByUniqueUsers.push({
-          app_id: metric.app_id,
-          name: appInfo.name,
-          logo_img_url: appInfo.logo_img_url,
-          value: countryData.value,
+          const countryRank = countryDataMap.get(countryData.country)!;
+          countryRank.topAppsByUniqueUsers.push({
+            app_id: metric.app_id,
+            name: appInfo.name,
+            logo_img_url: appInfo.logo_img_url,
+            value: countryData.value,
+          });
+
+          const metrics = countryMetricsMap.get(countryData.country)!;
+          metrics.unique += countryData.value;
         });
-
-        const metrics = countryMetricsMap.get(countryData.country)!;
-        metrics.unique += countryData.value;
-      });
+      }
 
       // Process new users by country
-      metric.new_users_last_7_days.forEach((countryData) => {
-        // Skip sanctioned countries
-        if (sanctionedCountries.includes(countryData.country)) return;
+      if (Array.isArray(metric.new_users_last_7_days)) {
+        metric.new_users_last_7_days.forEach((countryData) => {
+          // Skip sanctioned countries
+          if (sanctionedCountries.includes(countryData.country)) return;
 
-        if (!countryDataMap.has(countryData.country)) {
-          countryDataMap.set(countryData.country, {
-            country: countryData.country,
-            topAppsByUniqueUsers: [],
-            topAppsByNewUsers: [],
-            topAppsByTotalUsers: [],
-          });
-          countryMetricsMap.set(countryData.country, {
-            unique: 0,
-            new: 0,
-            total: 0,
-            name: getCountryName(countryData.country),
-          });
-        }
+          if (!countryDataMap.has(countryData.country)) {
+            countryDataMap.set(countryData.country, {
+              country: countryData.country,
+              topAppsByUniqueUsers: [],
+              topAppsByNewUsers: [],
+              topAppsByTotalUsers: [],
+            });
+            countryMetricsMap.set(countryData.country, {
+              unique: 0,
+              new: 0,
+              total: 0,
+              name: getCountryName(countryData.country),
+            });
+          }
 
-        const countryRank = countryDataMap.get(countryData.country)!;
-        countryRank.topAppsByNewUsers.push({
-          app_id: metric.app_id,
-          name: appInfo.name,
-          logo_img_url: appInfo.logo_img_url,
-          value: countryData.value,
+          const countryRank = countryDataMap.get(countryData.country)!;
+          countryRank.topAppsByNewUsers.push({
+            app_id: metric.app_id,
+            name: appInfo.name,
+            logo_img_url: appInfo.logo_img_url,
+            value: countryData.value,
+          });
+
+          const metrics = countryMetricsMap.get(countryData.country)!;
+          metrics.new += countryData.value;
         });
-
-        const metrics = countryMetricsMap.get(countryData.country)!;
-        metrics.new += countryData.value;
-      });
+      }
 
       // Process total users by country
-      metric.total_users_last_7_days.forEach((countryData) => {
-        // Skip sanctioned countries
-        if (sanctionedCountries.includes(countryData.country)) return;
+      if (Array.isArray(metric.total_users_last_7_days)) {
+        metric.total_users_last_7_days.forEach((countryData) => {
+          // Skip sanctioned countries
+          if (sanctionedCountries.includes(countryData.country)) return;
 
-        if (!countryDataMap.has(countryData.country)) {
-          countryDataMap.set(countryData.country, {
-            country: countryData.country,
-            topAppsByUniqueUsers: [],
-            topAppsByNewUsers: [],
-            topAppsByTotalUsers: [],
-          });
-          countryMetricsMap.set(countryData.country, {
-            unique: 0,
-            new: 0,
-            total: 0,
-            name: getCountryName(countryData.country),
-          });
-        }
+          if (!countryDataMap.has(countryData.country)) {
+            countryDataMap.set(countryData.country, {
+              country: countryData.country,
+              topAppsByUniqueUsers: [],
+              topAppsByNewUsers: [],
+              topAppsByTotalUsers: [],
+            });
+            countryMetricsMap.set(countryData.country, {
+              unique: 0,
+              new: 0,
+              total: 0,
+              name: getCountryName(countryData.country),
+            });
+          }
 
-        const countryRank = countryDataMap.get(countryData.country)!;
-        countryRank.topAppsByTotalUsers.push({
-          app_id: metric.app_id,
-          name: appInfo.name,
-          logo_img_url: appInfo.logo_img_url,
-          value: countryData.value,
+          const countryRank = countryDataMap.get(countryData.country)!;
+          countryRank.topAppsByTotalUsers.push({
+            app_id: metric.app_id,
+            name: appInfo.name,
+            logo_img_url: appInfo.logo_img_url,
+            value: countryData.value,
+          });
+
+          const metrics = countryMetricsMap.get(countryData.country)!;
+          metrics.total += countryData.value;
         });
-
-        const metrics = countryMetricsMap.get(countryData.country)!;
-        metrics.total += countryData.value;
-      });
+      }
     });
 
     // Sort apps within each country (show all apps, not just top 5)
@@ -383,33 +387,33 @@ export default async function CountryRanks() {
       <PageViewTracker />
       <header className="border-b border-gray-100 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between h-16 px-6">
-            <div className="flex items-center gap-12">
+          <div className="flex items-center justify-between h-16 px-4 sm:px-6">
+            <div className="flex items-center gap-6 sm:gap-12 overflow-x-auto">
               <Link href="/" className="flex-shrink-0">
                 <Image
                   src="/world_logo.svg"
                   alt="World Logo"
                   width={120}
                   height={28}
-                  className="h-6 w-auto"
+                  className="h-5 sm:h-6 w-auto"
                   priority
                 />
               </Link>
               <Link
                 href="/"
-                className="text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-base sm:text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap"
               >
                 Summary
               </Link>
               <Link
                 href="/rewards"
-                className="text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-base sm:text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap"
               >
                 Rewards
               </Link>
               <Link
                 href="/country-ranks"
-                className="text-lg font-medium text-gray-900 relative"
+                className="text-base sm:text-lg font-medium text-gray-900 relative whitespace-nowrap"
               >
                 Country Rankings
                 <div className="absolute -bottom-4 left-0 w-full h-0.5 bg-blue-600"></div>
@@ -419,9 +423,9 @@ export default async function CountryRanks() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
+      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
             Weekly Mini App Activity by Country
           </h1>
         </div>
@@ -431,11 +435,11 @@ export default async function CountryRanks() {
           countryMetrics={countryMetrics}
         />
 
-        <div className="mt-16 text-center text-sm text-gray-500">
+        <div className="mt-12 sm:mt-16 text-center text-sm text-gray-500">
           Data updates daily • Last loaded: {new Date().toLocaleString()}
         </div>
       </main>
-      
+
       <ScrollToTop />
     </div>
   );
