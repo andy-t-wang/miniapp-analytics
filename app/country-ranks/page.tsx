@@ -402,8 +402,8 @@ export default async function CountryRanks() {
       <header className="border-b border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto">
           {/* Desktop Header */}
-          <div className="hidden sm:flex items-center justify-between h-16 px-6">
-            <div className="flex items-center gap-12">
+          <div className="hidden sm:flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-8">
               <Link href="/" className="flex-shrink-0">
                 <Image
                   src="/world_logo.svg"
@@ -416,19 +416,19 @@ export default async function CountryRanks() {
               </Link>
               <Link
                 href="/"
-                className="text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-xl font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Summary
               </Link>
               <Link
                 href="/rewards"
-                className="text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-xl font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Rewards
               </Link>
               <Link
                 href="/country-ranks"
-                className="text-lg font-medium text-gray-900 relative"
+                className="text-xl font-medium text-gray-900 relative"
               >
                 Country Rankings
                 <div className="absolute -bottom-4 left-0 w-full h-0.5 bg-blue-600"></div>
@@ -456,7 +456,7 @@ export default async function CountryRanks() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
             Weekly Mini App Activity by Country
