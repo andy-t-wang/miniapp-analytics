@@ -5,14 +5,11 @@ export const revalidate = 86400; // 24 hours
 
 export async function GET(request: Request) {
   try {
-    console.log("Starting screenshot generation...");
-
     // Get the base URL from the request
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.search);
     const pathname = searchParams.get("pathname") || "";
     const baseUrl = `${url.protocol}//${url.host}/${pathname}`;
-    console.log("Taking screenshot of:", baseUrl);
 
     const { data } = await mql(baseUrl, {
       screenshot: true,

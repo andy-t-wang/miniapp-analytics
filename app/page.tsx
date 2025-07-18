@@ -191,7 +191,7 @@ export default async function Home({
               </Link>
               <Link
                 href="/"
-                className="text-xl max-sm:hidden font-medium text-gray-900"
+                className="text-xl max-sm:hidden font-medium text-gray-900 underline"
               >
                 Summary
               </Link>
@@ -200,6 +200,12 @@ export default async function Home({
                 className="text-xl max-sm:hidden font-medium text-gray-900"
               >
                 Rewards
+              </Link>
+              <Link
+                href="/country-ranks"
+                className="text-xl max-sm:hidden font-medium text-gray-900"
+              >
+                Country Rankings
               </Link>
             </div>
             <AnalyticsWrapper>

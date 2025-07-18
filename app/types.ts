@@ -25,6 +25,7 @@ export interface MetricsResponse {
   app_id: string;
   unique_users_last_7_days: CountryData[];
   unique_users: number;
+  new_users_last_7_days: CountryData[];
   total_users_last_7_days: CountryData[];
   total_users: number;
 }

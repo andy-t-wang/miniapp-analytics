@@ -763,9 +763,15 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
               </Link>
               <Link
                 href="/rewards"
-                className="text-xl max-sm:hidden font-medium text-gray-900"
+                className="text-xl max-sm:hidden font-medium text-gray-900 underline"
               >
                 Rewards
+              </Link>
+              <Link
+                href="/country-ranks"
+                className="text-xl max-sm:hidden font-medium text-gray-900"
+              >
+                Country Rankings
               </Link>
             </div>
             <AnalyticsWrapper>

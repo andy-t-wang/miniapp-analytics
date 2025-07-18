@@ -134,10 +134,7 @@ export async function GET() {
       app_id: app.app_id,
     }));
 
-    console.log(`Found ${ios_apps_cleaned.length} iOS apps`);
-
     // Generate PDF using @react-pdf/renderer
-    console.log("Generating PDF...");
     const pdfDoc = React.createElement(
       Document,
       null,
