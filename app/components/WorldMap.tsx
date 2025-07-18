@@ -366,18 +366,18 @@ export default function WorldMap({
         }}
         width={1000}
         height={400}
-        style={{ 
-          width: "100%", 
-          height: "100%", 
+        style={{
+          width: "100%",
+          height: "100%",
           maxWidth: "100%",
-          minHeight: "300px"
+          minHeight: "300px",
         }}
       >
-        <ZoomableGroup 
+        <ZoomableGroup
           zoom={1}
           minZoom={0.5}
           maxZoom={8}
-          filterZoomEvent={(evt) => {
+          filterZoomEvent={() => {
             // Allow all zoom events including touch gestures
             return true;
           }}

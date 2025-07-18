@@ -80,15 +80,19 @@ async function getData(): Promise<AppData[]> {
           app_id: metrics.app_id,
           name: appInfo.name,
           logo_img_url: appInfo.logo_img_url,
-          unique_users_7d: metrics.unique_users_last_7_days.reduce(
-            (sum, country) => sum + country.value,
-            0
-          ),
+          unique_users_7d: Array.isArray(metrics.unique_users_last_7_days)
+            ? metrics.unique_users_last_7_days.reduce(
+                (sum, country) => sum + country.value,
+                0
+              )
+            : 0,
           unique_users_all_time: metrics.unique_users || 0,
-          total_users_7d: metrics.total_users_last_7_days.reduce(
-            (sum, country) => sum + country.value,
-            0
-          ),
+          total_users_7d: Array.isArray(metrics.total_users_last_7_days)
+            ? metrics.total_users_last_7_days.reduce(
+                (sum, country) => sum + country.value,
+                0
+              )
+            : 0,
           total_users_all_time: metrics.total_users || 0,
           reward: typeof reward === "number" ? reward : 0,
         });

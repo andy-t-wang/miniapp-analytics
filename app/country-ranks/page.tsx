@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { MetricsResponse, ApiResponse } from "../types";
 import { PageViewTracker } from "../components/AnalyticsWrapper";
 import CountryRanksClient from "../components/CountryRanksClient";
 import ScrollToTop from "../components/ScrollToTop";
+import MobileNav from "../components/MobileNav";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -384,41 +386,62 @@ export default async function CountryRanks() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <PageViewTracker />
+      <Suspense fallback={null}>
+        <PageViewTracker />
+      </Suspense>
       <header className="border-b border-gray-100 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6">
-            <div className="flex items-center gap-6 sm:gap-12 overflow-x-auto">
+          {/* Desktop Header */}
+          <div className="hidden sm:flex items-center justify-between h-16 px-6">
+            <div className="flex items-center gap-12">
               <Link href="/" className="flex-shrink-0">
                 <Image
                   src="/world_logo.svg"
                   alt="World Logo"
                   width={120}
                   height={28}
-                  className="h-5 sm:h-6 w-auto"
+                  className="h-6 w-auto"
                   priority
                 />
               </Link>
               <Link
                 href="/"
-                className="text-base sm:text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap"
+                className="text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Summary
               </Link>
               <Link
                 href="/rewards"
-                className="text-base sm:text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap"
+                className="text-lg font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Rewards
               </Link>
               <Link
                 href="/country-ranks"
-                className="text-base sm:text-lg font-medium text-gray-900 relative whitespace-nowrap"
+                className="text-lg font-medium text-gray-900 relative"
               >
                 Country Rankings
                 <div className="absolute -bottom-4 left-0 w-full h-0.5 bg-blue-600"></div>
               </Link>
             </div>
+          </div>
+
+          {/* Mobile Header */}
+          <div className="sm:hidden flex items-center justify-between h-16 px-4 relative">
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="/world_logo.svg"
+                alt="World Logo"
+                width={100}
+                height={24}
+                className="h-5 w-auto"
+                priority
+              />
+            </Link>
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-lg font-medium text-gray-900">
+              Country Rankings
+            </div>
+            <MobileNav currentPage="Country Rankings" />
           </div>
         </div>
       </header>
