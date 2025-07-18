@@ -88,32 +88,40 @@ export default function CountryRanksClient({
           />
         </div>
 
-        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-sm text-gray-600">
+        <div className="mt-4 sm:mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center text-sm text-gray-600">
           <div>{Object.keys(countryData).length} regions with activity</div>
-          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
-            <div className="flex items-center gap-1 sm:gap-2 whitespace-nowrap">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-4">
+            <div className="flex items-center gap-1">
               <div
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: "#dbeafe" }}
               ></div>
               <span className="text-xs">&lt;50K</span>
+            </div>
+            <div className="flex items-center gap-1">
               <div
-                className="w-3 h-3 rounded-full ml-2 sm:ml-3"
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: "#3b82f6" }}
               ></div>
               <span className="text-xs">50-100K</span>
+            </div>
+            <div className="flex items-center gap-1">
               <div
-                className="w-3 h-3 rounded-full ml-2 sm:ml-3"
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: "#2563eb" }}
               ></div>
               <span className="text-xs">100-500K</span>
+            </div>
+            <div className="flex items-center gap-1">
               <div
-                className="w-3 h-3 rounded-full ml-2 sm:ml-3"
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: "#1e40af" }}
               ></div>
               <span className="text-xs">500K-1M</span>
+            </div>
+            <div className="flex items-center gap-1">
               <div
-                className="w-3 h-3 rounded-full ml-2 sm:ml-3"
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: "#1e3a8a" }}
               ></div>
               <span className="text-xs">&gt;1M</span>

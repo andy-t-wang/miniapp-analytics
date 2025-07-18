@@ -385,7 +385,7 @@ export default async function CountryRanks() {
   const { countryData, countryMetrics } = await getData();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
       <Suspense fallback={null}>
         <PageViewTracker />
       </Suspense>

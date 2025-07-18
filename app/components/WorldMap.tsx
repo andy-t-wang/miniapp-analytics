@@ -357,7 +357,7 @@ export default function WorldMap({
   );
 
   return (
-    <div className="relative bg-white touch-pan-x touch-pan-y touch-pinch-zoom">
+    <div className="relative bg-white touch-pan-x touch-pan-y touch-pinch-zoom overflow-hidden">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
