@@ -19,6 +19,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo, useState, useCallback } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
+import MobileNav from "./MobileNav";
+import { Suspense } from "react";
 
 function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
   const allApps = new Map<string, RewardsTableRow>();
@@ -740,10 +742,13 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <PageViewTracker />
+      <Suspense fallback={null}>
+        <PageViewTracker />
+      </Suspense>
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+          {/* Desktop Header */}
+          <div className="hidden sm:flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-8">
               <Link href="/" className="flex-shrink-0">
                 <Image
@@ -757,19 +762,19 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
               </Link>
               <Link
                 href="/"
-                className="text-xl max-sm:hidden font-medium text-gray-900"
+                className="text-xl font-medium text-gray-900"
               >
                 Summary
               </Link>
               <Link
                 href="/rewards"
-                className="text-xl max-sm:hidden font-medium text-gray-900 underline"
+                className="text-xl font-medium text-gray-900 underline"
               >
                 Rewards
               </Link>
               <Link
                 href="/country-ranks"
-                className="text-xl max-sm:hidden font-medium text-gray-900"
+                className="text-xl font-medium text-gray-900"
               >
                 Country Rankings
               </Link>
@@ -777,6 +782,33 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
             <AnalyticsWrapper>
               <SearchField />
             </AnalyticsWrapper>
+          </div>
+
+          {/* Mobile Header */}
+          <div className="sm:hidden flex items-center justify-between h-16 px-4 relative">
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="/world_logo.svg"
+                alt="World Logo"
+                width={100}
+                height={24}
+                className="h-5 w-auto"
+                priority
+              />
+            </Link>
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-lg font-medium text-gray-900">
+              Rewards
+            </div>
+            <MobileNav currentPage="Rewards" />
+          </div>
+
+          {/* Mobile Search */}
+          <div className="sm:hidden px-4 pb-4">
+            <div className="w-full">
+              <AnalyticsWrapper>
+                <SearchField />
+              </AnalyticsWrapper>
+            </div>
           </div>
         </div>
       </header>

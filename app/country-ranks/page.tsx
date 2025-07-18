@@ -12,6 +12,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Country Rankings - Mini Apps Statistics",
     description: "Country-based rankings for World App Mini Apps",
+    openGraph: {
+      images: [
+        {
+          url: "https://www.miniapps.world/api/screenshot?pathname=country-ranks",
+          alt: "Country Rankings Preview",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   };
 }
 
@@ -390,7 +400,7 @@ export default async function CountryRanks() {
         <PageViewTracker />
       </Suspense>
       <header className="border-b border-gray-100 bg-white">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Desktop Header */}
           <div className="hidden sm:flex items-center justify-between h-16 px-6">
             <div className="flex items-center gap-12">
@@ -446,7 +456,7 @@ export default async function CountryRanks() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
             Weekly Mini App Activity by Country
