@@ -424,15 +424,15 @@ export default function WorldMap({
                 } else if (data) {
                   const uniqueUsers = data.unique;
                   if (uniqueUsers > 1000000) {
-                    fillColor = "#1e3a8a"; // dark blue for 1M+ users
+                    fillColor = "#0c1844"; // very dark blue for 1M+ users
                   } else if (uniqueUsers > 500000) {
-                    fillColor = "#1e40af"; // blue for 500K-1M users
+                    fillColor = "#1e40af"; // dark blue for 500K-1M users
                   } else if (uniqueUsers > 100000) {
-                    fillColor = "#2563eb"; // medium blue for 100K-500K users
+                    fillColor = "#3b82f6"; // medium blue for 100K-500K users
                   } else if (uniqueUsers > 50000) {
-                    fillColor = "#3b82f6"; // light blue for 50K-100K users
+                    fillColor = "#93c5fd"; // light blue for 50K-100K users
                   } else {
-                    fillColor = "#dbeafe"; // very light blue for <50K users
+                    fillColor = "#e0f2fe"; // very light blue for <50K users
                   }
                 }
 

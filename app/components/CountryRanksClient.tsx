@@ -94,21 +94,21 @@ export default function CountryRanksClient({
             <div className="flex items-center gap-1">
               <div
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: "#dbeafe" }}
+                style={{ backgroundColor: "#e0f2fe" }}
               ></div>
               <span className="text-xs">&lt;50K</span>
             </div>
             <div className="flex items-center gap-1">
               <div
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: "#3b82f6" }}
+                style={{ backgroundColor: "#93c5fd" }}
               ></div>
               <span className="text-xs">50-100K</span>
             </div>
             <div className="flex items-center gap-1">
               <div
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: "#2563eb" }}
+                style={{ backgroundColor: "#3b82f6" }}
               ></div>
               <span className="text-xs">100-500K</span>
             </div>
@@ -122,7 +122,7 @@ export default function CountryRanksClient({
             <div className="flex items-center gap-1">
               <div
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: "#1e3a8a" }}
+                style={{ backgroundColor: "#0c1844" }}
               ></div>
               <span className="text-xs">&gt;1M</span>
             </div>
