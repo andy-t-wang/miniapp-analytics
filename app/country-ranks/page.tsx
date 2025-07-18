@@ -453,7 +453,7 @@ export default async function CountryRanks() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:w-[1200px] lg:max-w-[1200px]">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
             Weekly Mini App Activity by Country

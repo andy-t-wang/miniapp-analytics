@@ -131,26 +131,26 @@ export default function CountryRanksClient({
       </div>
 
       {selectedCountry && selectedCountryData && selectedCountryMetrics && (
-        <div className="bg-white rounded-3xl p-4 sm:p-8">
+        <div className="bg-white rounded-3xl p-4 sm:p-8 w-full lg:min-w-[1000px]">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-4xl font-semibold text-gray-900 mb-6 sm:mb-8">
               {selectedCountryMetrics.name}
             </h2>
             <div className="flex flex-col sm:flex-row justify-center sm:divide-x divide-gray-200 gap-6 sm:gap-0">
-              <div className="px-4 sm:px-8 text-center">
-                <div className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1">
+              <div className="px-4 sm:px-8 text-center min-w-[120px]">
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 min-w-[100px]">
                   {selectedCountryMetrics.new.toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-500">New Users</div>
               </div>
-              <div className="px-4 sm:px-8 text-center">
-                <div className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1">
+              <div className="px-4 sm:px-8 text-center min-w-[120px]">
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 min-w-[100px]">
                   {selectedCountryMetrics.unique.toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-500">Unique Users</div>
               </div>
-              <div className="px-4 sm:px-8 text-center">
-                <div className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1">
+              <div className="px-4 sm:px-8 text-center min-w-[120px]">
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 min-w-[100px]">
                   {selectedCountryMetrics.total.toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-500">Total Opens</div>
@@ -158,17 +158,17 @@ export default function CountryRanksClient({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 min-h-[500px] lg:min-w-[900px]">
             {/* New Users Ranking */}
-            <div>
+            <div className="min-w-0 lg:min-w-[280px]">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                 New Users
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 min-h-[400px]">
                 {selectedCountryData.topAppsByNewUsers.map((app, index) => (
                   <div
                     key={app.app_id}
-                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
                   >
                     <div className="flex-shrink-0 w-4 sm:w-5 text-right text-sm font-medium text-gray-400">
                       {index + 1}
@@ -185,7 +185,7 @@ export default function CountryRanksClient({
                         {app.name}
                       </div>
                     </div>
-                    <div className="text-gray-500 font-medium text-xs sm:text-sm">
+                    <div className="text-gray-500 font-medium text-xs sm:text-sm min-w-[60px] text-right">
                       {app.value.toLocaleString()}
                     </div>
                   </div>
@@ -194,15 +194,15 @@ export default function CountryRanksClient({
             </div>
 
             {/* Unique Users Ranking */}
-            <div>
+            <div className="min-w-0 lg:min-w-[280px]">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                 Unique Users
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 min-h-[400px]">
                 {selectedCountryData.topAppsByUniqueUsers.map((app, index) => (
                   <div
                     key={app.app_id}
-                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
                   >
                     <div className="flex-shrink-0 w-4 sm:w-5 text-right text-sm font-medium text-gray-400">
                       {index + 1}
@@ -219,7 +219,7 @@ export default function CountryRanksClient({
                         {app.name}
                       </div>
                     </div>
-                    <div className="text-gray-500 font-medium text-xs sm:text-sm">
+                    <div className="text-gray-500 font-medium text-xs sm:text-sm min-w-[60px] text-right">
                       {app.value.toLocaleString()}
                     </div>
                   </div>
@@ -228,15 +228,15 @@ export default function CountryRanksClient({
             </div>
 
             {/* Total Users Ranking */}
-            <div>
+            <div className="min-w-0 lg:min-w-[280px]">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                 Total Opens
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 min-h-[400px]">
                 {selectedCountryData.topAppsByTotalUsers.map((app, index) => (
                   <div
                     key={app.app_id}
-                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
                   >
                     <div className="flex-shrink-0 w-4 sm:w-5 text-right text-sm font-medium text-gray-400">
                       {index + 1}
@@ -253,7 +253,7 @@ export default function CountryRanksClient({
                         {app.name}
                       </div>
                     </div>
-                    <div className="text-gray-500 font-medium text-xs sm:text-sm">
+                    <div className="text-gray-500 font-medium text-xs sm:text-sm min-w-[60px] text-right">
                       {app.value.toLocaleString()}
                     </div>
                   </div>
