@@ -356,15 +356,30 @@ export default function WorldMap({
     null
   );
 
+  // Prevent page zoom when interacting with map
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div
       className="relative bg-white overflow-hidden"
       style={{
-        touchAction: "pan-x pan-y pinch-zoom",
+        touchAction: "none",
         WebkitTouchCallout: "none",
         WebkitUserSelect: "none",
         userSelect: "none",
       }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
     >
       <ComposableMap
         projection="geoMercator"
