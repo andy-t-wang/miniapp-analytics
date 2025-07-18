@@ -437,7 +437,7 @@ export default async function CountryRanks() {
           </div>
 
           {/* Mobile Header */}
-          <div className="sm:hidden flex items-center justify-between h-16 px-4 relative">
+          <div className="sm:hidden flex items-center justify-between h-16 px-4">
             <Link href="/" className="flex-shrink-0">
               <Image
                 src="/world_logo.svg"
@@ -448,9 +448,6 @@ export default async function CountryRanks() {
                 priority
               />
             </Link>
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-lg font-medium text-gray-900">
-              Country Rankings
-            </div>
             <MobileNav currentPage="Country Rankings" />
           </div>
         </div>

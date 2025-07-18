@@ -357,7 +357,15 @@ export default function WorldMap({
   );
 
   return (
-    <div className="relative bg-white touch-pan-x touch-pan-y touch-pinch-zoom overflow-hidden">
+    <div
+      className="relative bg-white overflow-hidden"
+      style={{
+        touchAction: "pan-x pan-y pinch-zoom",
+        WebkitTouchCallout: "none",
+        WebkitUserSelect: "none",
+        userSelect: "none",
+      }}
+    >
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
@@ -378,7 +386,7 @@ export default function WorldMap({
           minZoom={0.5}
           maxZoom={8}
           filterZoomEvent={() => {
-            // Allow all zoom events including touch gestures
+            // Always allow zoom events - we'll handle touch conflicts with CSS
             return true;
           }}
         >

@@ -16,6 +16,7 @@ import {
 import grantsData from "../public/grants1.json";
 import Link from "next/link";
 import MobileNav from "./components/MobileNav";
+import ScrollToTop from "./components/ScrollToTop";
 import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -196,7 +197,7 @@ export default async function Home({
           </div>
 
           {/* Mobile Header */}
-          <div className="sm:hidden flex items-center justify-between h-16 px-4 relative">
+          <div className="sm:hidden flex items-center justify-between h-16 px-4">
             <Link href="/" className="flex-shrink-0">
               <Image
                 src="/world_logo.svg"
@@ -207,9 +208,6 @@ export default async function Home({
                 priority
               />
             </Link>
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-lg font-medium text-gray-900">
-              Summary
-            </div>
             <MobileNav currentPage="Summary" />
           </div>
 
@@ -270,6 +268,8 @@ export default async function Home({
           Data updates daily • Last loaded: {new Date().toLocaleString()}
         </div>
       </main>
+      
+      <ScrollToTop />
     </div>
   );
 }

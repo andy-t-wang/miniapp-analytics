@@ -20,6 +20,7 @@ import { useMemo, useState, useCallback } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import MobileNav from "./MobileNav";
+import ScrollToTop from "./ScrollToTop";
 import { Suspense } from "react";
 
 function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
@@ -785,7 +786,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           </div>
 
           {/* Mobile Header */}
-          <div className="sm:hidden flex items-center justify-between h-16 px-4 relative">
+          <div className="sm:hidden flex items-center justify-between h-16 px-4">
             <Link href="/" className="flex-shrink-0">
               <Image
                 src="/world_logo.svg"
@@ -796,9 +797,6 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                 priority
               />
             </Link>
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-lg font-medium text-gray-900">
-              Rewards
-            </div>
             <MobileNav currentPage="Rewards" />
           </div>
 
@@ -991,6 +989,8 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           })()}
         </div>
       </main>
+      
+      <ScrollToTop />
     </div>
   );
 }
