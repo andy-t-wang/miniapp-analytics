@@ -358,14 +358,18 @@ export default function WorldMap({
 
   // Prevent page zoom when interacting with map
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Only prevent default for multi-touch (pinch zoom)
     if (e.touches.length > 1) {
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // Only prevent default for multi-touch (pinch zoom)
     if (e.touches.length > 1) {
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -373,7 +377,7 @@ export default function WorldMap({
     <div
       className="relative bg-white overflow-hidden"
       style={{
-        touchAction: "none",
+        touchAction: "pan-x pan-y",
         WebkitTouchCallout: "none",
         WebkitUserSelect: "none",
         userSelect: "none",

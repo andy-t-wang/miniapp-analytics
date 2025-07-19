@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
 const WorldMap = dynamic(() => import("./WorldMap"), {
   ssr: false,
@@ -40,31 +41,47 @@ export default function CountryRanksClient({
   countryMetrics,
 }: CountryRanksClientProps) {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [collapsedSections, setCollapsedSections] = useState({
+    new: false,
+    unique: false,
+    total: false,
+  });
 
   // Auto-select user's country based on IP
   useEffect(() => {
     const detectUserCountry = async () => {
       try {
         // Use a simple IP geolocation service
-        const response = await fetch('https://ipapi.co/json/');
+        const response = await fetch("https://ipapi.co/json/");
         const data = await response.json();
         const userCountryCode = data.country_code;
-        
+
         // Check if the user's country has data
         if (countryMetrics[userCountryCode]) {
           setSelectedCountry(userCountryCode);
         }
       } catch (error) {
-        console.log('Could not detect user country:', error);
+        console.log("Could not detect user country:", error);
         // Fallback to US if available
-        if (countryMetrics['US']) {
-          setSelectedCountry('US');
+        if (countryMetrics["US"]) {
+          setSelectedCountry("US");
         }
       }
     };
 
     detectUserCountry();
   }, [countryMetrics]);
+
+  // Reset collapsed sections when country changes
+  useEffect(() => {
+    if (selectedCountry) {
+      setCollapsedSections({
+        new: false,
+        unique: false,
+        total: false,
+      });
+    }
+  }, [selectedCountry]);
 
   const selectedCountryData = selectedCountry
     ? countryData[selectedCountry]
@@ -76,6 +93,12 @@ export default function CountryRanksClient({
   // Convert to Map for WorldMap component
   const countryMetricsMap = new Map(Object.entries(countryMetrics));
 
+  const toggleSection = (section: "new" | "unique" | "total") => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
   return (
     <>
@@ -158,19 +181,35 @@ export default function CountryRanksClient({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 min-h-[500px] lg:min-w-[900px]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 lg:min-h-[500px] lg:min-w-[900px]">
             {/* New Users Ranking */}
             <div className="min-w-0 lg:min-w-[280px]">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
-                New Users
-              </h3>
-              <div className="space-y-1 min-h-[400px]">
+              <button
+                onClick={() => toggleSection("new")}
+                className="lg:cursor-default lg:pointer-events-none w-full flex items-center justify-between text-left"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
+                  New Users
+                </h3>
+                <div className="lg:hidden">
+                  {collapsedSections.new ? (
+                    <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+                  )}
+                </div>
+              </button>
+              <div
+                className={`space-y-1 lg:min-h-[400px] ${
+                  collapsedSections.new ? "hidden lg:block" : "block"
+                }`}
+              >
                 {selectedCountryData.topAppsByNewUsers.map((app, index) => (
                   <div
                     key={app.app_id}
-                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
+                    className="flex items-center gap-3 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
                   >
-                    <div className="flex-shrink-0 w-4 sm:w-5 text-right text-sm font-medium text-gray-400">
+                    <div className="flex-shrink-0 w-6 sm:w-5 text-right text-sm font-medium text-gray-400">
                       {index + 1}
                     </div>
                     <Image
@@ -195,16 +234,32 @@ export default function CountryRanksClient({
 
             {/* Unique Users Ranking */}
             <div className="min-w-0 lg:min-w-[280px]">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
-                Unique Users
-              </h3>
-              <div className="space-y-1 min-h-[400px]">
+              <button
+                onClick={() => toggleSection("unique")}
+                className="lg:cursor-default lg:pointer-events-none w-full flex items-center justify-between text-left"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
+                  Unique Users
+                </h3>
+                <div className="lg:hidden">
+                  {collapsedSections.unique ? (
+                    <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+                  )}
+                </div>
+              </button>
+              <div
+                className={`space-y-1 lg:min-h-[400px] ${
+                  collapsedSections.unique ? "hidden lg:block" : "block"
+                }`}
+              >
                 {selectedCountryData.topAppsByUniqueUsers.map((app, index) => (
                   <div
                     key={app.app_id}
-                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
+                    className="flex items-center gap-3 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
                   >
-                    <div className="flex-shrink-0 w-4 sm:w-5 text-right text-sm font-medium text-gray-400">
+                    <div className="flex-shrink-0 w-6 sm:w-5 text-right text-sm font-medium text-gray-400">
                       {index + 1}
                     </div>
                     <Image
@@ -229,16 +284,32 @@ export default function CountryRanksClient({
 
             {/* Total Users Ranking */}
             <div className="min-w-0 lg:min-w-[280px]">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
-                Total Opens
-              </h3>
-              <div className="space-y-1 min-h-[400px]">
+              <button
+                onClick={() => toggleSection("total")}
+                className="lg:cursor-default lg:pointer-events-none w-full flex items-center justify-between text-left"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
+                  Total Opens
+                </h3>
+                <div className="lg:hidden">
+                  {collapsedSections.total ? (
+                    <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+                  )}
+                </div>
+              </button>
+              <div
+                className={`space-y-1 lg:min-h-[400px] ${
+                  collapsedSections.total ? "hidden lg:block" : "block"
+                }`}
+              >
                 {selectedCountryData.topAppsByTotalUsers.map((app, index) => (
                   <div
                     key={app.app_id}
-                    className="flex items-center gap-2 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
+                    className="flex items-center gap-3 sm:gap-3 py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors w-full min-w-[250px]"
                   >
-                    <div className="flex-shrink-0 w-4 sm:w-5 text-right text-sm font-medium text-gray-400">
+                    <div className="flex-shrink-0 w-6 sm:w-5 text-right text-sm font-medium text-gray-400">
                       {index + 1}
                     </div>
                     <Image
@@ -261,18 +332,8 @@ export default function CountryRanksClient({
               </div>
             </div>
           </div>
-
-          <div className="mt-8 sm:mt-12 text-center">
-            <button
-              onClick={() => setSelectedCountry(null)}
-              className="text-blue-600 hover:text-blue-700 font-medium text-base sm:text-lg"
-            >
-              View all regions
-            </button>
-          </div>
         </div>
       )}
-
     </>
   );
 }
