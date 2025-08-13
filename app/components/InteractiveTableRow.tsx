@@ -54,7 +54,7 @@ export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
         }`}
       >
         <td className="pl-3 sm:pl-6 pr-2 sm:pr-4 py-3 sm:py-4 text-sm text-gray-500 align-middle">
-          {index + 1}
+          {app.rank}
         </td>
         <td className="px-3 sm:px-6 py-3 sm:py-4 align-middle">
           <div className="flex items-center gap-3 sm:gap-4">

@@ -60,6 +60,14 @@ async function getData(): Promise<AppData[]> {
       },
     };
 
+    // Create a map of app_id to rank (position in top_apps array)
+    const rankMap = new Map(
+      appsData.app_rankings.top_apps.map((app, index) => [
+        app.app_id,
+        index + 1, // Rank starts from 1
+      ])
+    );
+
     // Create a map of app_id to reward value
     const rewardMap = new Map(
       grantsData.map((grant: { id: string; value: number }) => [
@@ -79,6 +87,7 @@ async function getData(): Promise<AppData[]> {
 
       if (appInfo) {
         const reward = rewardMap.get(metrics.app_id);
+        const rank = rankMap.get(metrics.app_id);
         combinedData.push({
           app_id: metrics.app_id,
           name: appInfo.name,
@@ -98,6 +107,7 @@ async function getData(): Promise<AppData[]> {
             : 0,
           total_users_all_time: metrics.total_users || 0,
           reward: typeof reward === "number" ? reward : 0,
+          rank: typeof rank === "number" ? rank : 999,
         });
       }
     }
@@ -128,8 +138,8 @@ export default async function Home({
   const direction = searchParamsData.direction;
   const searchTerm = searchParamsData.search?.toLowerCase();
 
-  const sortField = (sort || "total_users_7d") as SortField;
-  const sortDirection = (direction || "desc") as SortDirection;
+  const sortField = (sort || "rank") as SortField;
+  const sortDirection = (direction || "asc") as SortDirection;
 
   // Filter apps by search term
   const filteredApps = searchTerm

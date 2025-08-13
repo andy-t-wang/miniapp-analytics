@@ -20,14 +20,16 @@ function SortHeader({
   const nextDirection =
     isActive && currentDirection === "desc" ? "asc" : "desc";
 
+  const isLeftAligned = className?.includes('text-left');
+  
   return (
     <th
       scope="col"
-      className={`px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap ${className}`}
+      className={`px-3 py-3 ${isLeftAligned ? 'text-left' : 'text-right'} text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap ${className}`}
     >
       <a
         href={`?sort=${field}&direction=${nextDirection}`}
-        className="flex items-center justify-end gap-1 group hover:text-gray-700"
+        className={`flex items-center ${isLeftAligned ? 'justify-start' : 'justify-end'} gap-1 group hover:text-gray-700`}
       >
         {label}
         <div className="flex flex-col">
@@ -66,12 +68,13 @@ export function SortableTable({
       <table className="min-w-full">
         <thead>
           <tr className="border-b border-gray-200">
-            <th
-              scope="col"
-              className="pl-3 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"
-            >
-              #
-            </th>
+            <SortHeader
+              label="#"
+              field="rank"
+              currentSort={sortField}
+              currentDirection={sortDirection}
+              className="text-left pl-3 pr-2 w-8"
+            />
             <th
               scope="col"
               className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
