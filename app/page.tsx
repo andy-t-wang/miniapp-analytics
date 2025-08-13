@@ -43,7 +43,7 @@ async function getData(): Promise<AppData[]> {
       fetch(
         "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
         {
-          next: { revalidate: 86400 },
+          next: { revalidate: 1800 },
         }
       ),
     ]);
@@ -268,7 +268,7 @@ export default async function Home({
           Data updates daily • Last loaded: {new Date().toLocaleString()}
         </div>
       </main>
-      
+
       <ScrollToTop />
     </div>
   );
