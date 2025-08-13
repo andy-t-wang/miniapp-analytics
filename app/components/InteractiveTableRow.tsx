@@ -12,7 +12,7 @@ interface InteractiveTableRowProps {
   index: number;
 }
 
-export function InteractiveTableRow({ app, index }: InteractiveTableRowProps) {
+export function InteractiveTableRow({ app }: InteractiveTableRowProps) {
   const [showQRCode, setShowQRCode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
