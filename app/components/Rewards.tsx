@@ -3,7 +3,12 @@ import Image from "next/image";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import { SearchField } from "../components/SearchField";
 import { PageViewTracker } from "../components/AnalyticsWrapper";
-import { AppData, RewardsTableRow } from "../types";
+import {
+  TopApp,
+  RewardsTableRow,
+  WeeklyDevRewardsJson,
+  Season2Row,
+} from "../types";
 import grants1 from "../../public/grants1.json";
 import grants2 from "../../public/grants2.json";
 import grants3 from "../../public/grants3.json";
@@ -23,7 +28,7 @@ import MobileNav from "./MobileNav";
 import ScrollToTop from "./ScrollToTop";
 import { Suspense } from "react";
 
-function getRewardsTableData(appsMetadataData?: AppData[]): RewardsTableRow[] {
+function getRewardsTableData(appsMetadataData?: TopApp[]): RewardsTableRow[] {
   const allApps = new Map<string, RewardsTableRow>();
 
   // Process grants1
@@ -411,7 +416,7 @@ function RewardsTableRowComponent({
         <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white group-hover:bg-gray-50">
           {index + 1}
         </td>
-        <td className="relative pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white group-hover:bg-gray-50 min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:group-hover:bg-gray-50 before:-z-10">
+        <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white group-hover:bg-gray-50 min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:group-hover:bg-gray-50 before:-z-10">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
               {row.logo_img_url ? (
@@ -637,10 +642,88 @@ function RewardsTableRowComponent({
   );
 }
 
-export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
+export default function RewardsPage({
+  metadata,
+  weeklyRewards,
+}: {
+  metadata: TopApp[];
+  weeklyRewards: WeeklyDevRewardsJson;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+
+  const season = searchParams.get("season") || "2";
+
+  // Season 2 dataset (from weekly rewards endpoint)
+  const logoByAppId = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const app of metadata) {
+      if (app.logo_img_url) m.set(app.app_id, app.logo_img_url);
+    }
+    return m;
+  }, [metadata]);
+
+  const { s2Weeks, s2Rows } = useMemo(() => {
+    const weeks = weeklyRewards.rewards.map((r) => r.week).sort();
+    const appMap = new Map<string, Season2Row>();
+    for (const w of weeklyRewards.rewards) {
+      const weekKey = w.week;
+      for (const ar of w.app_rewards) {
+        const existing = appMap.get(ar.app_id);
+        if (!existing) {
+          appMap.set(ar.app_id, {
+            app_id: ar.app_id,
+            name: ar.app_name,
+            logo_img_url: logoByAppId.get(ar.app_id) || "",
+            rewardsByWeek: { [weekKey]: ar.reward_wld },
+            total: ar.reward_wld,
+          });
+        } else {
+          existing.rewardsByWeek[weekKey] = ar.reward_wld;
+          existing.total += ar.reward_wld;
+        }
+      }
+    }
+    return { s2Weeks: weeks, s2Rows: Array.from(appMap.values()) };
+  }, [weeklyRewards, logoByAppId]);
+
+  const weekIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    s2Weeks.forEach((w, i) => map.set(w, i + 1));
+    return map;
+  }, [s2Weeks]);
+
+  const latestWeek = s2Weeks.length ? s2Weeks[s2Weeks.length - 1] : "total";
+  const s2SortField = searchParams.get("s2sort") || latestWeek;
+  const s2Direction = searchParams.get("s2dir") || "desc";
+
+  const sortedS2 = useMemo(() => {
+    const multiplier = s2Direction === "asc" ? 1 : -1;
+    return [...s2Rows].sort((a, b) => {
+      const aVal =
+        s2SortField === "total" ? a.total : a.rewardsByWeek[s2SortField] || 0;
+      const bVal =
+        s2SortField === "total" ? b.total : b.rewardsByWeek[s2SortField] || 0;
+      return (aVal - bVal) * multiplier;
+    });
+  }, [s2Rows, s2SortField, s2Direction]);
+
+  function handleS2Sort(field: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    const nextDir =
+      s2SortField === field && s2Direction === "desc" ? "asc" : "desc";
+    params.set("season", "2");
+    params.set("s2sort", field);
+    params.set("s2dir", nextDir);
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  function setSeason(nextSeason: "1" | "2") {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("season", nextSeason);
+    router.replace(`${pathname}?${params.toString()}`);
+  }
 
   // State for expanded rows
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -723,23 +806,32 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
   };
 
   // Calculate rewards summary
-  const weekTotal = data.reduce((sum, app) => sum + app.wave11, 0);
-  const totalAllTime = data.reduce(
-    (sum, app) =>
-      sum +
-      app.wave1 +
-      app.wave2 +
-      app.wave3 +
-      app.wave4 +
-      app.wave5 +
-      app.wave6 +
-      app.wave7 +
-      app.wave8 +
-      app.wave9 +
-      app.wave10 +
-      app.wave11,
-    0
-  );
+  const weekTotal =
+    season === "1"
+      ? data.reduce((sum, app) => sum + app.wave11, 0)
+      : sortedS2.reduce(
+          (sum, app) => sum + (app.rewardsByWeek[latestWeek] || 0),
+          0
+        );
+  const totalAllTime =
+    season === "1"
+      ? data.reduce(
+          (sum, app) =>
+            sum +
+            app.wave1 +
+            app.wave2 +
+            app.wave3 +
+            app.wave4 +
+            app.wave5 +
+            app.wave6 +
+            app.wave7 +
+            app.wave8 +
+            app.wave9 +
+            app.wave10 +
+            app.wave11,
+          0
+        )
+      : sortedS2.reduce((sum, app) => sum + app.total, 0);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -761,10 +853,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
                   priority
                 />
               </Link>
-              <Link
-                href="/"
-                className="text-xl font-medium text-gray-900"
-              >
+              <Link href="/" className="text-xl font-medium text-gray-900">
                 Summary
               </Link>
               <Link
@@ -858,128 +947,270 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
-                  #
-                </th>
-                <th className="relative pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
-                  App
-                </th>
-                {/* Hidden on mobile, shown sm and up */}
-                <SortHeader
-                  label="Week 1 Reward"
-                  field="wave1"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave1")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                {/* Hidden on mobile, shown sm and up */}
-                <SortHeader
-                  label="Week 2 Reward"
-                  field="wave2"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave2")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 3 Reward"
-                  field="wave3"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave3")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 4 Reward"
-                  field="wave4"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave4")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 5 Reward"
-                  field="wave5"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave5")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 6 Reward"
-                  field="wave6"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave6")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 7 Reward"
-                  field="wave7"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave7")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 8 Reward"
-                  field="wave8"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave8")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 9 Reward"
-                  field="wave9"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave9")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 10 Reward"
-                  field="wave10"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave10")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Week 11 Reward"
-                  field="wave11"
-                  currentSort={sort}
-                  currentDirection={direction}
-                  onClick={() => handleSort("wave11")}
-                  className="px-2 sm:px-3 hidden sm:table-cell"
-                />
-                {/* Shown only on mobile */}
-                <th
-                  scope="col"
-                  className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
-                >
-                  Total Rewards
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {data.map((row, i) => (
-                <RewardsTableRowComponent
-                  key={row.app_id}
-                  row={row}
-                  index={i}
-                  isExpanded={expandedRows.has(row.app_id)}
-                  onToggle={() => toggleRowExpansion(row.app_id)}
-                />
-              ))}
-            </tbody>
-          </table>
+        {/* Season Toggle */}
+        <div className="mb-4 flex gap-2">
+          <button
+            className={`px-4 py-2 rounded-lg border ${
+              season === "2"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-gray-700 border-gray-300"
+            }`}
+            onClick={() => setSeason("2")}
+          >
+            Season 2
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg border ${
+              season === "1"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-gray-700 border-gray-300"
+            }`}
+            onClick={() => setSeason("1")}
+          >
+            Season 1
+          </button>
         </div>
+
+        {season === "2" ? (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                    #
+                  </th>
+                  <th className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                    App
+                  </th>
+                  {s2Weeks.map((w, idx) => {
+                    const isActive = s2SortField === w;
+                    return (
+                      <th
+                        key={w}
+                        onClick={() => handleS2Sort(w)}
+                        className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
+                        title={w}
+                      >
+                        <span className="inline-flex items-center gap-1">
+                          {`Week ${idx + 1}`}
+                          {isActive ? (
+                            s2Direction === "desc" ? (
+                              <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                            ) : (
+                              <ChevronUpIcon className="h-4 w-4 text-blue-500" />
+                            )
+                          ) : (
+                            <ChevronUpIcon className="h-4 w-4 opacity-0 group-hover:opacity-50" />
+                          )}
+                        </span>
+                      </th>
+                    );
+                  })}
+                  <th
+                    onClick={() => handleS2Sort("total")}
+                    className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      Total
+                      {s2SortField === "total" ? (
+                        s2Direction === "desc" ? (
+                          <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                        ) : (
+                          <ChevronUpIcon className="h-4 w-4 text-blue-500" />
+                        )
+                      ) : null}
+                    </span>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
+                    title={s2SortField === "total" ? undefined : s2SortField}
+                  >
+                    {s2SortField === "total"
+                      ? "Total"
+                      : `Week ${weekIndexMap.get(s2SortField) ?? ""}`}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {sortedS2.map((row, i) => (
+                  <tr
+                    key={row.app_id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                      {i + 1}
+                    </td>
+                    <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                          {row.logo_img_url ? (
+                            <Image
+                              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                              src={row.logo_img_url}
+                              alt={row.name}
+                              width={40}
+                              height={40}
+                            />
+                          ) : (
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-500 text-xs font-medium">
+                                {row.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900">
+                            {row.name}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    {s2Weeks.map((w) => (
+                      <td
+                        key={w}
+                        className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
+                      >
+                        {(row.rewardsByWeek[w] || 0).toLocaleString()}
+                      </td>
+                    ))}
+                    <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
+                      {row.total.toLocaleString()}
+                    </td>
+                    {/* Mobile single value */}
+                    <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
+                      {(s2SortField === "total"
+                        ? row.total
+                        : row.rewardsByWeek[s2SortField] || 0
+                      ).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                    #
+                  </th>
+                  <th className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                    App
+                  </th>
+                  <SortHeader
+                    label="Week 1 Reward"
+                    field="wave1"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave1")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 2 Reward"
+                    field="wave2"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave2")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 3 Reward"
+                    field="wave3"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave3")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 4 Reward"
+                    field="wave4"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave4")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 5 Reward"
+                    field="wave5"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave5")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 6 Reward"
+                    field="wave6"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave6")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 7 Reward"
+                    field="wave7"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave7")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 8 Reward"
+                    field="wave8"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave8")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 9 Reward"
+                    field="wave9"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave9")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 10 Reward"
+                    field="wave10"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave10")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <SortHeader
+                    label="Week 11 Reward"
+                    field="wave11"
+                    currentSort={sort}
+                    currentDirection={direction}
+                    onClick={() => handleSort("wave11")}
+                    className="px-2 sm:px-3 hidden sm:table-cell"
+                  />
+                  <th
+                    scope="col"
+                    className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
+                  >
+                    Total Rewards
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {data.map((row, i) => (
+                  <RewardsTableRowComponent
+                    key={row.app_id}
+                    row={row}
+                    index={i}
+                    isExpanded={expandedRows.has(row.app_id)}
+                    onToggle={() => toggleRowExpansion(row.app_id)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
         <div className="mt-4 text-center text-sm text-gray-500">
           Data from World Foundation • Last loaded:
           {(() => {
@@ -989,7 +1220,7 @@ export default function RewardsPage({ metadata }: { metadata: AppData[] }) {
           })()}
         </div>
       </main>
-      
+
       <ScrollToTop />
     </div>
   );

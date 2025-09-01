@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import RewardsPage from "../components/Rewards";
 import { Metadata } from "next";
+import { WeeklyDevRewardsJson } from "../types";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -31,9 +32,21 @@ export default async function RewardsPageWrapper() {
   };
   const metadata = await fetchAppsMetadata();
 
+  const fetchWeeklyRewards = async (): Promise<WeeklyDevRewardsJson> => {
+    const res = await fetch(
+      "https://metrics.worldcoin.org/weekly_dev_rewards.json"
+    );
+    return res.json();
+  };
+
+  const weeklyRewards = await fetchWeeklyRewards();
+
   return (
     <Suspense fallback={<div></div>}>
-      <RewardsPage metadata={metadata.app_rankings.top_apps} />
+      <RewardsPage
+        metadata={metadata.app_rankings.top_apps}
+        weeklyRewards={weeklyRewards}
+      />
     </Suspense>
-);
+  );
 }

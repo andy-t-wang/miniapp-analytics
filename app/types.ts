@@ -61,3 +61,27 @@ export type SortField =
   | "reward"
   | "rank";
 export type SortDirection = "asc" | "desc";
+
+// Season 2 weekly rewards JSON from
+// https://metrics.worldcoin.org/weekly_dev_rewards.json
+export interface WeeklyDevRewardsJson {
+  rewards: {
+    app_rewards: {
+      app_id: string;
+      app_name: string;
+      reward_wld: number;
+      rewards_usd: number;
+    }[];
+    week: string; // e.g. "2025-08-18"
+  }[];
+  snapshot_timestamp: string;
+}
+
+// Internal shape for Season 2 table rows
+export interface Season2Row {
+  app_id: string;
+  name: string;
+  logo_img_url: string;
+  rewardsByWeek: Record<string, number>;
+  total: number;
+}
