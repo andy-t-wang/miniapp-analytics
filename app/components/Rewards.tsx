@@ -439,6 +439,7 @@ function RewardsTableRowComponent({
             <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
               {row.logo_img_url ? (
                 imageError ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
                     src={row.logo_img_url}
@@ -689,6 +690,7 @@ export default function RewardsPage({
     const appMap = new Map<string, Season2Row>();
     for (const w of weeklyRewards.rewards) {
       const weekKey = (w.week || "").toString().split("T")[0];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const ar of w.app_rewards as any[]) {
         const raw = ar.rewards_usd;
         const cleaned =
