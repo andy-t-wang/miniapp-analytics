@@ -69,8 +69,8 @@ export interface WeeklyDevRewardsJson {
     app_rewards: {
       app_id: string;
       app_name: string;
-      reward_wld: number;
       rewards_usd: number;
+      app_category?: "Airdrop" | "New Non Airdrop" | "Non Airdrop";
     }[];
     week: string; // e.g. "2025-08-18"
   }[];
@@ -84,4 +84,5 @@ export interface Season2Row {
   logo_img_url: string;
   rewardsByWeek: Record<string, number>;
   total: number;
+  category?: "Airdrop" | "New Non Airdrop" | "Non Airdrop";
 }

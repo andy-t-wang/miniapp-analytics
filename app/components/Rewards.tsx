@@ -28,6 +28,24 @@ import MobileNav from "./MobileNav";
 import ScrollToTop from "./ScrollToTop";
 import { Suspense } from "react";
 
+function formatNumberSafe(value: unknown): string {
+  const num = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(num) ? num.toLocaleString() : "0";
+}
+
+function categoryBadgeClass(category?: string): string {
+  switch (category) {
+    case "Airdrop":
+      return "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
+    case "New Non Airdrop":
+      return "bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-200";
+    case "Non Airdrop":
+      return "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200";
+    default:
+      return "bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-200";
+  }
+}
+
 function getRewardsTableData(appsMetadataData?: TopApp[]): RewardsTableRow[] {
   const allApps = new Map<string, RewardsTableRow>();
 
@@ -665,23 +683,33 @@ export default function RewardsPage({
   }, [metadata]);
 
   const { s2Weeks, s2Rows } = useMemo(() => {
-    const weeks = weeklyRewards.rewards.map((r) => r.week).sort();
+    const weeks = weeklyRewards.rewards
+      .map((r) => (r.week || "").toString().split("T")[0])
+      .sort();
     const appMap = new Map<string, Season2Row>();
     for (const w of weeklyRewards.rewards) {
-      const weekKey = w.week;
-      for (const ar of w.app_rewards) {
+      const weekKey = (w.week || "").toString().split("T")[0];
+      for (const ar of w.app_rewards as any[]) {
+        const raw = ar.rewards_usd;
+        const cleaned =
+          typeof raw === "string" ? raw.replace(/[,_\s]/g, "") : raw;
+        const parsed = typeof cleaned === "number" ? cleaned : Number(cleaned);
+        const reward = Number.isFinite(parsed) ? parsed : 0;
         const existing = appMap.get(ar.app_id);
         if (!existing) {
           appMap.set(ar.app_id, {
             app_id: ar.app_id,
             name: ar.app_name,
             logo_img_url: logoByAppId.get(ar.app_id) || "",
-            rewardsByWeek: { [weekKey]: ar.reward_wld },
-            total: ar.reward_wld,
+            rewardsByWeek: { [weekKey]: reward },
+            total: reward,
+            category: ar.app_category,
           });
         } else {
-          existing.rewardsByWeek[weekKey] = ar.reward_wld;
-          existing.total += ar.reward_wld;
+          existing.rewardsByWeek[weekKey] = reward;
+          existing.total = (existing.total || 0) + reward;
+          if (!existing.category && ar.app_category)
+            existing.category = ar.app_category;
         }
       }
     }
@@ -697,17 +725,27 @@ export default function RewardsPage({
   const latestWeek = s2Weeks.length ? s2Weeks[s2Weeks.length - 1] : "total";
   const s2SortField = searchParams.get("s2sort") || latestWeek;
   const s2Direction = searchParams.get("s2dir") || "desc";
+  const s2Category = (searchParams.get("s2cat") || "all") as
+    | "all"
+    | "Airdrop"
+    | "New Non Airdrop"
+    | "Non Airdrop";
+
+  const s2RowsFiltered = useMemo(() => {
+    if (s2Category === "all") return s2Rows;
+    return s2Rows.filter((r) => r.category === s2Category);
+  }, [s2Rows, s2Category]);
 
   const sortedS2 = useMemo(() => {
     const multiplier = s2Direction === "asc" ? 1 : -1;
-    return [...s2Rows].sort((a, b) => {
+    return [...s2RowsFiltered].sort((a, b) => {
       const aVal =
         s2SortField === "total" ? a.total : a.rewardsByWeek[s2SortField] || 0;
       const bVal =
         s2SortField === "total" ? b.total : b.rewardsByWeek[s2SortField] || 0;
       return (aVal - bVal) * multiplier;
     });
-  }, [s2Rows, s2SortField, s2Direction]);
+  }, [s2RowsFiltered, s2SortField, s2Direction]);
 
   function handleS2Sort(field: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -722,6 +760,15 @@ export default function RewardsPage({
   function setSeason(nextSeason: "1" | "2") {
     const params = new URLSearchParams(searchParams.toString());
     params.set("season", nextSeason);
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  function setS2Category(
+    cat: "all" | "Airdrop" | "New Non Airdrop" | "Non Airdrop"
+  ) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("season", "2");
+    params.set("s2cat", cat);
     router.replace(`${pathname}?${params.toString()}`);
   }
 
@@ -982,6 +1029,9 @@ export default function RewardsPage({
                   <th className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
                     App
                   </th>
+                  <th className="px-3 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                    Category
+                  </th>
                   {s2Weeks.map((w, idx) => {
                     const isActive = s2SortField === w;
                     return (
@@ -1033,6 +1083,58 @@ export default function RewardsPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
+                {/* Category filter row */}
+                <tr>
+                  <td className="px-3 py-2" colSpan={2}>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-600">Filter:</span>
+                      <button
+                        className={`px-2 py-1 rounded border ${
+                          s2Category === "all"
+                            ? "bg-blue-100 border-blue-300 text-blue-800"
+                            : "bg-white border-gray-300 text-gray-700"
+                        }`}
+                        onClick={() => setS2Category("all")}
+                      >
+                        All
+                      </button>
+                      <button
+                        className={`px-2 py-1 rounded border ${
+                          s2Category === "Airdrop"
+                            ? "bg-blue-100 border-blue-300 text-blue-800"
+                            : "bg-white border-gray-300 text-gray-700"
+                        }`}
+                        onClick={() => setS2Category("Airdrop")}
+                      >
+                        Airdrop
+                      </button>
+                      <button
+                        className={`px-2 py-1 rounded border ${
+                          s2Category === "New Non Airdrop"
+                            ? "bg-blue-100 border-blue-300 text-blue-800"
+                            : "bg-white border-gray-300 text-gray-700"
+                        }`}
+                        onClick={() => setS2Category("New Non Airdrop")}
+                      >
+                        New Non Airdrop
+                      </button>
+                      <button
+                        className={`px-2 py-1 rounded border ${
+                          s2Category === "Non Airdrop"
+                            ? "bg-blue-100 border-blue-300 text-blue-800"
+                            : "bg-white border-gray-300 text-gray-700"
+                        }`}
+                        onClick={() => setS2Category("Non Airdrop")}
+                      >
+                        Non Airdrop
+                      </button>
+                    </div>
+                  </td>
+                  <td
+                    className="hidden sm:table-cell"
+                    colSpan={s2Weeks.length + 2}
+                  ></td>
+                </tr>
                 {sortedS2.map((row, i) => (
                   <tr
                     key={row.app_id}
@@ -1067,23 +1169,33 @@ export default function RewardsPage({
                         </div>
                       </div>
                     </td>
+                    <td className="hidden sm:table-cell text-xs text-gray-700 font-medium">
+                      <span
+                        className={`px-2 py-1 rounded-full ${categoryBadgeClass(
+                          row.category
+                        )}`}
+                      >
+                        {row.category || "—"}
+                      </span>
+                    </td>
                     {s2Weeks.map((w) => (
                       <td
                         key={w}
                         className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
                       >
-                        {(row.rewardsByWeek[w] || 0).toLocaleString()}
+                        {formatNumberSafe(row.rewardsByWeek[w] || 0)}
                       </td>
                     ))}
                     <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
-                      {row.total.toLocaleString()}
+                      {formatNumberSafe(row.total ?? 0)}
                     </td>
                     {/* Mobile single value */}
                     <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-                      {(s2SortField === "total"
-                        ? row.total
-                        : row.rewardsByWeek[s2SortField] || 0
-                      ).toLocaleString()}
+                      {formatNumberSafe(
+                        s2SortField === "total"
+                          ? row.total
+                          : row.rewardsByWeek[s2SortField] || 0
+                      )}
                     </td>
                   </tr>
                 ))}
