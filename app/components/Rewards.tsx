@@ -481,63 +481,63 @@ function RewardsTableRowComponent({
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave1.toLocaleString()}
+          {formatNumberSafe(row.wave1)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave2.toLocaleString()}
+          {formatNumberSafe(row.wave2)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave3.toLocaleString()}
+          {formatNumberSafe(row.wave3)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave4.toLocaleString()}
+          {formatNumberSafe(row.wave4)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave5.toLocaleString()}
+          {formatNumberSafe(row.wave5)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave6.toLocaleString()}
+          {formatNumberSafe(row.wave6)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave7.toLocaleString()}
+          {formatNumberSafe(row.wave7)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave8.toLocaleString()}
+          {formatNumberSafe(row.wave8)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave9.toLocaleString()}
+          {formatNumberSafe(row.wave9)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave10.toLocaleString()}
+          {formatNumberSafe(row.wave10)}
         </td>
         {/* Hidden on mobile, shown sm and up */}
         <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle w-16 sm:w-auto hidden sm:table-cell">
-          {row.wave11.toLocaleString()}
+          {formatNumberSafe(row.wave11)}
         </td>
         {/* Shown only on mobile */}
         <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-          {(
+          {formatNumberSafe(
             row.wave1 +
-            row.wave2 +
-            row.wave3 +
-            row.wave4 +
-            row.wave5 +
-            row.wave6 +
-            row.wave7 +
-            row.wave8 +
-            row.wave9 +
-            row.wave10 +
-            row.wave11
-          ).toLocaleString()}
+              row.wave2 +
+              row.wave3 +
+              row.wave4 +
+              row.wave5 +
+              row.wave6 +
+              row.wave7 +
+              row.wave8 +
+              row.wave9 +
+              row.wave10 +
+              row.wave11
+          )}
         </td>
       </tr>
       {/* Conditionally rendered details row for mobile */}
@@ -559,7 +559,7 @@ function RewardsTableRowComponent({
                   Week 1:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave1.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave1)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -568,7 +568,7 @@ function RewardsTableRowComponent({
                   Week 2:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave2.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave2)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -577,7 +577,7 @@ function RewardsTableRowComponent({
                   Week 3:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave3.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave3)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -586,7 +586,7 @@ function RewardsTableRowComponent({
                   Week 4:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave4.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave4)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -595,7 +595,7 @@ function RewardsTableRowComponent({
                   Week 5:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave5.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave5)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -604,7 +604,7 @@ function RewardsTableRowComponent({
                   Week 6:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave6.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave6)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -613,7 +613,7 @@ function RewardsTableRowComponent({
                   Week 7:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave7.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave7)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -622,7 +622,7 @@ function RewardsTableRowComponent({
                   Week 8:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave8.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave8)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -631,7 +631,7 @@ function RewardsTableRowComponent({
                   Week 9:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave9.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave9)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -640,7 +640,7 @@ function RewardsTableRowComponent({
                   Week 10:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave10.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave10)} WLD
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -649,7 +649,7 @@ function RewardsTableRowComponent({
                   Week 11:
                 </span>
                 <span className="text-sm font-medium text-gray-900">
-                  {row.wave11.toLocaleString()} WLD
+                  {formatNumberSafe(row.wave11)} WLD
                 </span>
               </div>
             </div>
