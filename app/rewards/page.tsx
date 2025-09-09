@@ -34,7 +34,12 @@ export default async function RewardsPageWrapper() {
 
   const fetchWeeklyRewards = async (): Promise<WeeklyDevRewardsJson> => {
     const res = await fetch(
-      "https://metrics.worldcoin.org/weekly_dev_rewards.json"
+      "https://metrics.worldcoin.org/weekly_dev_rewards.json",
+      // nocache
+      {
+        next: { revalidate: 0 },
+        cache: "no-store",
+      }
     );
     return res.json();
   };
