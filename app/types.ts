@@ -16,6 +16,8 @@ export interface TopApp {
   logo_img_url: string;
 }
 
+export type AppCategory = "Airdrop" | "New Non Airdrop" | "Non Airdrop";
+
 export interface ApiResponse {
   app_rankings: {
     top_apps: TopApp[];
@@ -70,7 +72,7 @@ export interface WeeklyDevRewardsJson {
       app_id: string;
       app_name: string;
       rewards_usd: number;
-      app_category?: "Airdrop" | "New Non Airdrop" | "Non Airdrop";
+      app_category?: AppCategory;
     }[];
     week: string; // e.g. "2025-08-18"
   }[];
@@ -84,5 +86,7 @@ export interface Season2Row {
   logo_img_url: string;
   rewardsByWeek: Record<string, number>;
   total: number;
-  category?: "Airdrop" | "New Non Airdrop" | "Non Airdrop";
+  categoriesByWeek: Record<string, AppCategory | undefined>;
+  latestCategory?: AppCategory;
+  categoryHistory: AppCategory[];
 }

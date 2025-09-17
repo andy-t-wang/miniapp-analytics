@@ -8,6 +8,7 @@ import {
   RewardsTableRow,
   WeeklyDevRewardsJson,
   Season2Row,
+  AppCategory,
 } from "../types";
 import grants1 from "../../public/grants1.json";
 import grants2 from "../../public/grants2.json";
@@ -33,7 +34,7 @@ function formatNumberSafe(value: unknown): string {
   return Number.isFinite(num) ? num.toLocaleString() : "0";
 }
 
-function categoryBadgeClass(category?: string): string {
+function categoryBadgeClass(category?: AppCategory | null): string {
   switch (category) {
     case "Airdrop":
       return "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200";
@@ -44,6 +45,14 @@ function categoryBadgeClass(category?: string): string {
     default:
       return "bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-200";
   }
+}
+
+function getCategoryForWeek(
+  row: Season2Row,
+  weekKey?: string
+): AppCategory | undefined {
+  if (weekKey) return row.categoriesByWeek[weekKey] ?? row.latestCategory;
+  return row.latestCategory;
 }
 
 function getRewardsTableData(appsMetadataData?: TopApp[]): RewardsTableRow[] {
@@ -684,12 +693,12 @@ export default function RewardsPage({
   }, [metadata]);
 
   const { s2Weeks, s2Rows } = useMemo(() => {
-    const weeks = weeklyRewards.rewards
-      .map((r) => (r.week || "").toString().split("T")[0])
-      .sort();
+    const weekSet = new Set<string>();
     const appMap = new Map<string, Season2Row>();
     for (const w of weeklyRewards.rewards) {
-      const weekKey = (w.week || "").toString().split("T")[0];
+      const weekRaw = (w.week || "").toString();
+      const weekKey = weekRaw.split("T")[0] || weekRaw;
+      if (weekKey) weekSet.add(weekKey);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const ar of w.app_rewards as any[]) {
         const raw = ar.rewards_usd;
@@ -697,25 +706,54 @@ export default function RewardsPage({
           typeof raw === "string" ? raw.replace(/[,_\s]/g, "") : raw;
         const parsed = typeof cleaned === "number" ? cleaned : Number(cleaned);
         const reward = Number.isFinite(parsed) ? parsed : 0;
+        const category = ar.app_category as AppCategory | undefined;
         const existing = appMap.get(ar.app_id);
         if (!existing) {
           appMap.set(ar.app_id, {
             app_id: ar.app_id,
             name: ar.app_name,
             logo_img_url: logoByAppId.get(ar.app_id) || "",
-            rewardsByWeek: { [weekKey]: reward },
+            rewardsByWeek: weekKey ? { [weekKey]: reward } : {},
             total: reward,
-            category: ar.app_category,
+            categoriesByWeek: weekKey && category ? { [weekKey]: category } : {},
+            latestCategory: undefined,
+            categoryHistory: category ? [category] : [],
           });
         } else {
-          existing.rewardsByWeek[weekKey] = reward;
+          if (weekKey) existing.rewardsByWeek[weekKey] = reward;
           existing.total = (existing.total || 0) + reward;
-          if (!existing.category && ar.app_category)
-            existing.category = ar.app_category;
+          if (weekKey && category) {
+            existing.categoriesByWeek[weekKey] = category;
+            if (!existing.categoryHistory.includes(category)) {
+              existing.categoryHistory.push(category);
+            }
+          }
         }
       }
     }
-    return { s2Weeks: weeks, s2Rows: Array.from(appMap.values()) };
+    const sortedWeeks = Array.from(weekSet).sort();
+    appMap.forEach((row) => {
+      for (let i = sortedWeeks.length - 1; i >= 0; i -= 1) {
+        const key = sortedWeeks[i];
+        const cat = row.categoriesByWeek[key];
+        if (cat) {
+          row.latestCategory = cat;
+          break;
+        }
+      }
+
+      const seen = new Set<AppCategory>();
+      const history: AppCategory[] = [];
+      for (const key of sortedWeeks) {
+        const cat = row.categoriesByWeek[key];
+        if (cat && !seen.has(cat)) {
+          seen.add(cat);
+          history.push(cat);
+        }
+      }
+      row.categoryHistory = history;
+    });
+    return { s2Weeks: sortedWeeks, s2Rows: Array.from(appMap.values()) };
   }, [weeklyRewards, logoByAppId]);
 
   const weekIndexMap = useMemo(() => {
@@ -724,7 +762,10 @@ export default function RewardsPage({
     return map;
   }, [s2Weeks]);
 
-  const latestWeek = s2Weeks.length ? s2Weeks[s2Weeks.length - 1] : "total";
+  const latestRewardWeek = s2Weeks.length
+    ? s2Weeks[s2Weeks.length - 1]
+    : undefined;
+  const latestWeek = latestRewardWeek ?? "total";
   const s2SortField = searchParams.get("s2sort") || latestWeek;
   const s2Direction = searchParams.get("s2dir") || "desc";
   const s2Category = (searchParams.get("s2cat") || "all") as
@@ -733,10 +774,18 @@ export default function RewardsPage({
     | "New Non Airdrop"
     | "Non Airdrop";
 
+  const activeWeekForCategory = useMemo(() => {
+    if (!s2Weeks.length) return undefined;
+    if (!s2SortField || s2SortField === "total") return latestRewardWeek;
+    return s2Weeks.includes(s2SortField) ? s2SortField : latestRewardWeek;
+  }, [s2SortField, s2Weeks, latestRewardWeek]);
+
   const s2RowsFiltered = useMemo(() => {
     if (s2Category === "all") return s2Rows;
-    return s2Rows.filter((r) => r.category === s2Category);
-  }, [s2Rows, s2Category]);
+    return s2Rows.filter(
+      (r) => getCategoryForWeek(r, activeWeekForCategory) === s2Category
+    );
+  }, [s2Rows, s2Category, activeWeekForCategory]);
 
   const sortedS2 = useMemo(() => {
     const multiplier = s2Direction === "asc" ? 1 : -1;
@@ -959,13 +1008,19 @@ export default function RewardsPage({
             </div>
             <div className="text-3xl font-semibold text-gray-900">
               <span className="inline-flex items-center gap-2">
-                <Image
-                  src="/wld-token.png"
-                  alt="WLD"
-                  width={28}
-                  height={28}
-                  className="inline-block"
-                />
+                {season === "2" ? (
+                  <span className="text-2xl font-semibold leading-none text-gray-700">
+                    $
+                  </span>
+                ) : (
+                  <Image
+                    src="/wld-token.png"
+                    alt="WLD"
+                    width={28}
+                    height={28}
+                    className="inline-block"
+                  />
+                )}
                 {weekTotal.toLocaleString()}
               </span>
             </div>
@@ -981,13 +1036,19 @@ export default function RewardsPage({
             </div>
             <div className="text-3xl font-semibold text-gray-900">
               <span className="inline-flex items-center gap-2">
-                <Image
-                  src="/wld-token.png"
-                  alt="WLD"
-                  width={28}
-                  height={28}
-                  className="inline-block"
-                />
+                {season === "2" ? (
+                  <span className="text-2xl font-semibold leading-none text-gray-700">
+                    $
+                  </span>
+                ) : (
+                  <Image
+                    src="/wld-token.png"
+                    alt="WLD"
+                    width={28}
+                    height={28}
+                    className="inline-block"
+                  />
+                )}
                 {totalAllTime.toLocaleString()}
               </span>
             </div>
@@ -1021,10 +1082,11 @@ export default function RewardsPage({
         </div>
 
         {season === "2" ? (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
+          <>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
                   <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
                     #
                   </th>
@@ -1137,73 +1199,118 @@ export default function RewardsPage({
                     colSpan={s2Weeks.length + 2}
                   ></td>
                 </tr>
-                {sortedS2.map((row, i) => (
-                  <tr
-                    key={row.app_id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
-                      {i + 1}
-                    </td>
-                    <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                          {row.logo_img_url ? (
-                            <Image
-                              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
-                              src={row.logo_img_url}
-                              alt={row.name}
-                              width={40}
-                              height={40}
-                            />
-                          ) : (
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                              <span className="text-gray-500 text-xs font-medium">
-                                {row.name.charAt(0).toUpperCase()}
-                              </span>
+                {sortedS2.map((row, i) => {
+                  const displayCategory = getCategoryForWeek(
+                    row,
+                    activeWeekForCategory
+                  );
+                  const hasCategoryChanges = row.categoryHistory.length > 1;
+                  const tooltipTitle = hasCategoryChanges
+                    ? "Category changed over time"
+                    : displayCategory
+                    ? `Category: ${displayCategory}`
+                    : "No category data";
+                  const tooltipDetails = hasCategoryChanges
+                    ? `History: ${row.categoryHistory.join(" → ")}`
+                    : undefined;
+                  const tooltipLabel = tooltipDetails
+                    ? `${tooltipTitle}. ${tooltipDetails}`
+                    : tooltipTitle;
+                  return (
+                    <tr
+                      key={row.app_id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                        {i + 1}
+                      </td>
+                      <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                            {row.logo_img_url ? (
+                              <Image
+                                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                                src={row.logo_img_url}
+                                alt={row.name}
+                                width={40}
+                                height={40}
+                              />
+                            ) : (
+                              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-gray-500 text-xs font-medium">
+                                  {row.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900">
+                              {row.name}
                             </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900">
-                            {row.name}
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="hidden sm:table-cell text-xs text-gray-700 font-medium">
-                      <span
-                        className={`px-2 py-1 rounded-full ${categoryBadgeClass(
-                          row.category
-                        )}`}
-                      >
-                        {row.category || "—"}
-                      </span>
-                    </td>
-                    {s2Weeks.map((w) => (
-                      <td
-                        key={w}
-                        className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
-                      >
-                        {formatNumberSafe(row.rewardsByWeek[w] || 0)}
                       </td>
-                    ))}
-                    <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
-                      {formatNumberSafe(row.total ?? 0)}
-                    </td>
-                    {/* Mobile single value */}
-                    <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-                      {formatNumberSafe(
-                        s2SortField === "total"
-                          ? row.total
-                          : row.rewardsByWeek[s2SortField] || 0
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      <td className="hidden sm:table-cell text-xs text-gray-700 font-medium">
+                        <span
+                          className="relative inline-flex items-center group focus-visible:outline-none"
+                          tabIndex={0}
+                          aria-label={tooltipLabel}
+                        >
+                          <span
+                            className={`px-2 py-1 rounded-full ${categoryBadgeClass(
+                              displayCategory ?? null
+                            )}`}
+                          >
+                            {displayCategory || "—"}
+                            {hasCategoryChanges ? (
+                              <span
+                                className="ml-1 text-[10px] text-gray-500"
+                                aria-hidden="true"
+                              >
+                                *
+                              </span>
+                            ) : null}
+                          </span>
+                          <div className="absolute bottom-full left-1/2 z-20 hidden w-56 -translate-x-1/2 -translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-xs text-white shadow-lg transition group-hover:flex group-focus-visible:flex flex-col text-left">
+                            <span className="font-medium">{tooltipTitle}</span>
+                            {tooltipDetails ? (
+                              <span className="mt-1 text-gray-300">
+                                {tooltipDetails}
+                              </span>
+                            ) : null}
+                          </div>
+                        </span>
+                      </td>
+                      {s2Weeks.map((w) => (
+                        <td
+                          key={w}
+                          className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
+                        >
+                          {formatNumberSafe(row.rewardsByWeek[w] || 0)}
+                        </td>
+                      ))}
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
+                        {formatNumberSafe(row.total ?? 0)}
+                      </td>
+                      {/* Mobile single value */}
+                      <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
+                        {formatNumberSafe(
+                          s2SortField === "total"
+                            ? row.total
+                            : row.rewardsByWeek[s2SortField] || 0
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
+            </div>
+            <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+              <span aria-hidden="true">*</span>
+              <span>App changed categories in previous weeks</span>
+            </div>
+          </>
         ) : (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
             <table className="min-w-full">
