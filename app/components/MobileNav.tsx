@@ -13,7 +13,7 @@ export default function MobileNav({}: MobileNavProps) {
   const [pathname, setPathname] = useState("");
 
   // Safe pathname detection
-  useEffect(() => { 
+  useEffect(() => {
     setPathname(window.location.pathname);
   }, []);
 
@@ -21,6 +21,11 @@ export default function MobileNav({}: MobileNavProps) {
     { href: "/", label: "Summary", icon: "📊" },
     { href: "/rewards", label: "Rewards", icon: "🎁" },
     { href: "/country-ranks", label: "Country Rankings", icon: "🌍" },
+    {
+      href: "https://worldbuild.fwb.help/",
+      label: "Apply to World Build",
+      icon: "🏗️",
+    },
   ];
 
   // Prevent body scroll when drawer is open

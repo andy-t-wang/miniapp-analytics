@@ -17,6 +17,7 @@ import grantsData from "../public/grants1.json";
 import Link from "next/link";
 import MobileNav from "./components/MobileNav";
 import ScrollToTop from "./components/ScrollToTop";
+import EventBanner from "./components/EventBanner";
 import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -200,6 +201,12 @@ export default async function Home({
               >
                 Country Rankings
               </Link>
+              <Link
+                href="https://worldbuild.fwb.help/"
+                className="text-xl font-medium text-gray-900"
+              >
+                World Build
+              </Link>
             </div>
             <AnalyticsWrapper>
               <SearchField />
@@ -233,46 +240,7 @@ export default async function Home({
       </header>
 
       <main className="relative flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="pointer-events-none fixed right-4 top-24 z-20 sm:right-8">
-          <Link
-            href="https://luma.com/air5tbr4"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pointer-events-auto inline-flex items-center gap-3 rounded-lg border border-blue-200 bg-white/95 px-3 py-2 text-sm shadow-md backdrop-blur-sm transition hover:border-blue-300 hover:bg-white"
-          >
-            <div className="relative h-20 w-20 overflow-hidden rounded-md">
-              <video
-                className="h-full w-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                poster="/world-build.png"
-              >
-                <source src="/world-build.webm" type="video/webm" />
-                <Image
-                  src="/world-build.png"
-                  alt="World Build 2 graphic"
-                  width={80}
-                  height={80}
-                  className="h-full w-full object-cover"
-                />
-              </video>
-            </div>
-            <div className="flex min-w-[10rem] flex-col">
-              <span className="text-sm font-semibold text-gray-900">
-                Apply to World Build!
-              </span>
-              <span className="text-xs text-gray-600">
-                Apply to join the second batch of World Build. <br />A two month
-                accelerator for mini apps. Notable <br />
-                mini apps from the first batch include ORO, UNO, Credit,
-                <br />
-                Squadletics, Superhero, Sage, and more.
-              </span>
-            </div>
-          </Link>
-        </div>
+        <EventBanner />
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
