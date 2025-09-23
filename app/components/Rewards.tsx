@@ -445,12 +445,12 @@ function RewardsTableRowComponent({
         </td>
         <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white group-hover:bg-gray-50 min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:group-hover:bg-gray-50 before:-z-10">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+            <div className="flex-shrink-0 h-10 w-10">
               {row.logo_img_url ? (
                 imageError ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                    className="h-10 w-10 rounded-full object-cover bg-gray-100"
                     src={row.logo_img_url}
                     alt={row.name}
                     onError={() => {
@@ -462,7 +462,7 @@ function RewardsTableRowComponent({
                   />
                 ) : (
                   <Image
-                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                    className="h-10 w-10 rounded-full object-cover bg-gray-100"
                     src={row.logo_img_url}
                     alt={row.name}
                     width={40}
@@ -475,7 +475,7 @@ function RewardsTableRowComponent({
                   />
                 )
               ) : (
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500 text-xs font-medium">
                     {row.name.charAt(0).toUpperCase()}
                   </span>
@@ -1009,7 +1009,7 @@ export default function RewardsPage({
             <div className="text-3xl font-semibold text-gray-900">
               <span className="inline-flex items-center gap-2">
                 {season === "2" ? (
-                  <span className="text-2xl font-semibold leading-none text-gray-700">
+                  <span className="text-3xl font-semibold leading-none text-gray-900 flex items-baseline">
                     $
                   </span>
                 ) : (
@@ -1037,7 +1037,7 @@ export default function RewardsPage({
             <div className="text-3xl font-semibold text-gray-900">
               <span className="inline-flex items-center gap-2">
                 {season === "2" ? (
-                  <span className="text-2xl font-semibold leading-none text-gray-700">
+                  <span className="text-3xl font-semibold leading-none text-gray-900 flex items-baseline">
                     $
                   </span>
                 ) : (
@@ -1149,55 +1149,53 @@ export default function RewardsPage({
               <tbody className="divide-y divide-gray-200">
                 {/* Category filter row */}
                 <tr>
-                  <td className="px-3 py-2" colSpan={2}>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-600">Filter:</span>
-                      <button
-                        className={`px-2 py-1 rounded border ${
-                          s2Category === "all"
-                            ? "bg-blue-100 border-blue-300 text-blue-800"
-                            : "bg-white border-gray-300 text-gray-700"
-                        }`}
-                        onClick={() => setS2Category("all")}
-                      >
-                        All
-                      </button>
-                      <button
-                        className={`px-2 py-1 rounded border ${
-                          s2Category === "Airdrop"
-                            ? "bg-blue-100 border-blue-300 text-blue-800"
-                            : "bg-white border-gray-300 text-gray-700"
-                        }`}
-                        onClick={() => setS2Category("Airdrop")}
-                      >
-                        Airdrop
-                      </button>
-                      <button
-                        className={`px-2 py-1 rounded border ${
-                          s2Category === "New Non Airdrop"
-                            ? "bg-blue-100 border-blue-300 text-blue-800"
-                            : "bg-white border-gray-300 text-gray-700"
-                        }`}
-                        onClick={() => setS2Category("New Non Airdrop")}
-                      >
-                        New Non Airdrop
-                      </button>
-                      <button
-                        className={`px-2 py-1 rounded border ${
-                          s2Category === "Non Airdrop"
-                            ? "bg-blue-100 border-blue-300 text-blue-800"
-                            : "bg-white border-gray-300 text-gray-700"
-                        }`}
-                        onClick={() => setS2Category("Non Airdrop")}
-                      >
-                        Non Airdrop
-                      </button>
+                  <td className="px-3 py-3" colSpan={100}>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-gray-600 font-medium flex-shrink-0">Filter:</span>
+                      <div className="flex gap-3 flex-1">
+                        <button
+                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                            s2Category === "all"
+                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                          onClick={() => setS2Category("all")}
+                        >
+                          All
+                        </button>
+                        <button
+                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                            s2Category === "Airdrop"
+                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                          onClick={() => setS2Category("Airdrop")}
+                        >
+                          Airdrop
+                        </button>
+                        <button
+                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                            s2Category === "New Non Airdrop"
+                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                          onClick={() => setS2Category("New Non Airdrop")}
+                        >
+                          New Non Airdrop
+                        </button>
+                        <button
+                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                            s2Category === "Non Airdrop"
+                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                          onClick={() => setS2Category("Non Airdrop")}
+                        >
+                          Non Airdrop
+                        </button>
+                      </div>
                     </div>
                   </td>
-                  <td
-                    className="hidden sm:table-cell"
-                    colSpan={s2Weeks.length + 2}
-                  ></td>
                 </tr>
                 {sortedS2.map((row, i) => {
                   const displayCategory = getCategoryForWeek(
@@ -1226,17 +1224,17 @@ export default function RewardsPage({
                       </td>
                       <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
                         <div className="flex items-center gap-3 sm:gap-4">
-                          <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                          <div className="flex-shrink-0 h-10 w-10">
                             {row.logo_img_url ? (
                               <Image
-                                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-gray-100"
+                                className="h-10 w-10 rounded-full object-cover bg-gray-100"
                                 src={row.logo_img_url}
                                 alt={row.name}
                                 width={40}
                                 height={40}
                               />
                             ) : (
-                              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                                 <span className="text-gray-500 text-xs font-medium">
                                   {row.name.charAt(0).toUpperCase()}
                                 </span>
@@ -1257,7 +1255,7 @@ export default function RewardsPage({
                           aria-label={tooltipLabel}
                         >
                           <span
-                            className={`px-2 py-1 rounded-full ${categoryBadgeClass(
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${categoryBadgeClass(
                               displayCategory ?? null
                             )}`}
                           >
