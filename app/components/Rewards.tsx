@@ -1207,6 +1207,9 @@ export default function RewardsPage({
               </div>
             ) : (
               <>
+                <div className="mb-3 text-sm text-gray-600 font-medium">
+                  All values in WLD
+                </div>
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
                   <table className="min-w-full">
                     <thead>
