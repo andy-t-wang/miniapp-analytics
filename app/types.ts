@@ -72,6 +72,7 @@ export interface WeeklyDevRewardsJson {
       app_id: string;
       app_name: string;
       rewards_usd: number;
+      reward_wld: number;
       app_category?: AppCategory;
     }[];
     week: string; // e.g. "2025-08-18"

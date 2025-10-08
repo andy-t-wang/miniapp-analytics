@@ -681,7 +681,7 @@ export default function RewardsPage({
   const router = useRouter();
   const pathname = usePathname();
 
-  const season = searchParams.get("season") || "2";
+  const season = searchParams.get("season") || "3";
 
   // Season 2 dataset (from weekly rewards endpoint)
   const logoByAppId = useMemo(() => {
@@ -692,22 +692,39 @@ export default function RewardsPage({
     return m;
   }, [metadata]);
 
-  const { s2Weeks, s2Rows } = useMemo(() => {
-    const weekSet = new Set<string>();
-    const appMap = new Map<string, Season2Row>();
+  const { s2Weeks, s2Rows, s3Weeks, s3Rows } = useMemo(() => {
+    const season2Cutoff = new Date("2025-09-29");
+    const s2WeekSet = new Set<string>();
+    const s3WeekSet = new Set<string>();
+    const s2AppMap = new Map<string, Season2Row>();
+    const s3AppMap = new Map<string, Season2Row>();
+
     for (const w of weeklyRewards.rewards) {
       const weekRaw = (w.week || "").toString();
       const weekKey = weekRaw.split("T")[0] || weekRaw;
-      if (weekKey) weekSet.add(weekKey);
+      const weekDate = new Date(weekKey);
+      const isSeason3 = weekDate >= season2Cutoff;
+
+      if (weekKey) {
+        if (isSeason3) {
+          s3WeekSet.add(weekKey);
+        } else {
+          s2WeekSet.add(weekKey);
+        }
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const ar of w.app_rewards as any[]) {
-        const raw = ar.rewards_usd;
+        const raw = isSeason3 ? ar.reward_wld : ar.rewards_usd;
         const cleaned =
           typeof raw === "string" ? raw.replace(/[,_\s]/g, "") : raw;
         const parsed = typeof cleaned === "number" ? cleaned : Number(cleaned);
         const reward = Number.isFinite(parsed) ? parsed : 0;
         const category = ar.app_category as AppCategory | undefined;
+
+        const appMap = isSeason3 ? s3AppMap : s2AppMap;
         const existing = appMap.get(ar.app_id);
+
         if (!existing) {
           appMap.set(ar.app_id, {
             app_id: ar.app_id,
@@ -715,7 +732,8 @@ export default function RewardsPage({
             logo_img_url: logoByAppId.get(ar.app_id) || "",
             rewardsByWeek: weekKey ? { [weekKey]: reward } : {},
             total: reward,
-            categoriesByWeek: weekKey && category ? { [weekKey]: category } : {},
+            categoriesByWeek:
+              weekKey && category ? { [weekKey]: category } : {},
             latestCategory: undefined,
             categoryHistory: category ? [category] : [],
           });
@@ -731,54 +749,83 @@ export default function RewardsPage({
         }
       }
     }
-    const sortedWeeks = Array.from(weekSet).sort();
-    appMap.forEach((row) => {
-      for (let i = sortedWeeks.length - 1; i >= 0; i -= 1) {
-        const key = sortedWeeks[i];
-        const cat = row.categoriesByWeek[key];
-        if (cat) {
-          row.latestCategory = cat;
-          break;
-        }
-      }
 
-      const seen = new Set<AppCategory>();
-      const history: AppCategory[] = [];
-      for (const key of sortedWeeks) {
-        const cat = row.categoriesByWeek[key];
-        if (cat && !seen.has(cat)) {
-          seen.add(cat);
-          history.push(cat);
+    const sortedS2Weeks = Array.from(s2WeekSet).sort();
+    const sortedS3Weeks = Array.from(s3WeekSet).sort();
+
+    [s2AppMap, s3AppMap].forEach((appMap, idx) => {
+      const sortedWeeks = idx === 0 ? sortedS2Weeks : sortedS3Weeks;
+      appMap.forEach((row) => {
+        for (let i = sortedWeeks.length - 1; i >= 0; i -= 1) {
+          const key = sortedWeeks[i];
+          const cat = row.categoriesByWeek[key];
+          if (cat) {
+            row.latestCategory = cat;
+            break;
+          }
         }
-      }
-      row.categoryHistory = history;
+
+        const seen = new Set<AppCategory>();
+        const history: AppCategory[] = [];
+        for (const key of sortedWeeks) {
+          const cat = row.categoriesByWeek[key];
+          if (cat && !seen.has(cat)) {
+            seen.add(cat);
+            history.push(cat);
+          }
+        }
+        row.categoryHistory = history;
+      });
     });
-    return { s2Weeks: sortedWeeks, s2Rows: Array.from(appMap.values()) };
+
+    return {
+      s2Weeks: sortedS2Weeks,
+      s2Rows: Array.from(s2AppMap.values()),
+      s3Weeks: sortedS3Weeks,
+      s3Rows: Array.from(s3AppMap.values())
+    };
   }, [weeklyRewards, logoByAppId]);
 
   const weekIndexMap = useMemo(() => {
     const map = new Map<string, number>();
     s2Weeks.forEach((w, i) => map.set(w, i + 1));
+    s3Weeks.forEach((w, i) => map.set(w, i + 1));
     return map;
-  }, [s2Weeks]);
+  }, [s2Weeks, s3Weeks]);
 
-  const latestRewardWeek = s2Weeks.length
+  const latestS2Week = s2Weeks.length
     ? s2Weeks[s2Weeks.length - 1]
     : undefined;
-  const latestWeek = latestRewardWeek ?? "total";
-  const s2SortField = searchParams.get("s2sort") || latestWeek;
+  const latestS3Week = s3Weeks.length
+    ? s3Weeks[s3Weeks.length - 1]
+    : undefined;
+  const latestWeek = season === "3" ? (latestS3Week ?? "total") : (latestS2Week ?? "total");
+  const s2SortField = searchParams.get("s2sort") || (latestS2Week ?? "total");
   const s2Direction = searchParams.get("s2dir") || "desc";
   const s2Category = (searchParams.get("s2cat") || "all") as
     | "all"
     | "Airdrop"
     | "New Non Airdrop"
     | "Non Airdrop";
+  const s3SortField = searchParams.get("s3sort") || (latestS3Week ?? "total");
+  const s3Direction = searchParams.get("s3dir") || "desc";
+  const s3Category = (searchParams.get("s3cat") || "all") as
+    | "all"
+    | "Airdrop"
+    | "New Non Airdrop"
+    | "Non Airdrop";
 
   const activeWeekForCategory = useMemo(() => {
-    if (!s2Weeks.length) return undefined;
-    if (!s2SortField || s2SortField === "total") return latestRewardWeek;
-    return s2Weeks.includes(s2SortField) ? s2SortField : latestRewardWeek;
-  }, [s2SortField, s2Weeks, latestRewardWeek]);
+    if (season === "3") {
+      if (!s3Weeks.length) return undefined;
+      if (!s3SortField || s3SortField === "total") return latestS3Week;
+      return s3Weeks.includes(s3SortField) ? s3SortField : latestS3Week;
+    } else {
+      if (!s2Weeks.length) return undefined;
+      if (!s2SortField || s2SortField === "total") return latestS2Week;
+      return s2Weeks.includes(s2SortField) ? s2SortField : latestS2Week;
+    }
+  }, [season, s2SortField, s2Weeks, latestS2Week, s3SortField, s3Weeks, latestS3Week]);
 
   const s2RowsFiltered = useMemo(() => {
     if (s2Category === "all") return s2Rows;
@@ -786,6 +833,13 @@ export default function RewardsPage({
       (r) => getCategoryForWeek(r, activeWeekForCategory) === s2Category
     );
   }, [s2Rows, s2Category, activeWeekForCategory]);
+
+  const s3RowsFiltered = useMemo(() => {
+    if (s3Category === "all") return s3Rows;
+    return s3Rows.filter(
+      (r) => getCategoryForWeek(r, activeWeekForCategory) === s3Category
+    );
+  }, [s3Rows, s3Category, activeWeekForCategory]);
 
   const sortedS2 = useMemo(() => {
     const multiplier = s2Direction === "asc" ? 1 : -1;
@@ -798,6 +852,17 @@ export default function RewardsPage({
     });
   }, [s2RowsFiltered, s2SortField, s2Direction]);
 
+  const sortedS3 = useMemo(() => {
+    const multiplier = s3Direction === "asc" ? 1 : -1;
+    return [...s3RowsFiltered].sort((a, b) => {
+      const aVal =
+        s3SortField === "total" ? a.total : a.rewardsByWeek[s3SortField] || 0;
+      const bVal =
+        s3SortField === "total" ? b.total : b.rewardsByWeek[s3SortField] || 0;
+      return (aVal - bVal) * multiplier;
+    });
+  }, [s3RowsFiltered, s3SortField, s3Direction]);
+
   function handleS2Sort(field: string) {
     const params = new URLSearchParams(searchParams.toString());
     const nextDir =
@@ -808,7 +873,17 @@ export default function RewardsPage({
     router.replace(`${pathname}?${params.toString()}`);
   }
 
-  function setSeason(nextSeason: "1" | "2") {
+  function handleS3Sort(field: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    const nextDir =
+      s3SortField === field && s3Direction === "desc" ? "asc" : "desc";
+    params.set("season", "3");
+    params.set("s3sort", field);
+    params.set("s3dir", nextDir);
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  function setSeason(nextSeason: "1" | "2" | "3") {
     const params = new URLSearchParams(searchParams.toString());
     params.set("season", nextSeason);
     router.replace(`${pathname}?${params.toString()}`);
@@ -820,6 +895,15 @@ export default function RewardsPage({
     const params = new URLSearchParams(searchParams.toString());
     params.set("season", "2");
     params.set("s2cat", cat);
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  function setS3Category(
+    cat: "all" | "Airdrop" | "New Non Airdrop" | "Non Airdrop"
+  ) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("season", "3");
+    params.set("s3cat", cat);
     router.replace(`${pathname}?${params.toString()}`);
   }
 
@@ -907,6 +991,8 @@ export default function RewardsPage({
   const weekTotal =
     season === "1"
       ? data.reduce((sum, app) => sum + app.wave11, 0)
+      : season === "3"
+      ? s3Weeks.length > 0 ? 100000 : 0
       : sortedS2.reduce(
           (sum, app) => sum + (app.rewardsByWeek[latestWeek] || 0),
           0
@@ -929,6 +1015,8 @@ export default function RewardsPage({
             app.wave11,
           0
         )
+      : season === "3"
+      ? 100000 * s3Weeks.length
       : sortedS2.reduce((sum, app) => sum + app.total, 0);
 
   return (
@@ -1008,7 +1096,7 @@ export default function RewardsPage({
             </div>
             <div className="text-3xl font-semibold text-gray-900">
               <span className="inline-flex items-center gap-2">
-                {season === "2" ? (
+                {season === "2" || season === "3" ? (
                   <span className="text-3xl font-semibold leading-none text-gray-900 flex items-baseline">
                     $
                   </span>
@@ -1036,7 +1124,7 @@ export default function RewardsPage({
             </div>
             <div className="text-3xl font-semibold text-gray-900">
               <span className="inline-flex items-center gap-2">
-                {season === "2" ? (
+                {season === "2" || season === "3" ? (
                   <span className="text-3xl font-semibold leading-none text-gray-900 flex items-baseline">
                     $
                   </span>
@@ -1061,6 +1149,16 @@ export default function RewardsPage({
         <div className="mb-4 flex gap-2">
           <button
             className={`px-4 py-2 rounded-lg border ${
+              season === "3"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-gray-700 border-gray-300"
+            }`}
+            onClick={() => setSeason("3")}
+          >
+            Season 3
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg border ${
               season === "2"
                 ? "bg-blue-600 text-white border-blue-600"
                 : "bg-white text-gray-700 border-gray-300"
@@ -1081,228 +1179,492 @@ export default function RewardsPage({
           </button>
         </div>
 
-        {season === "2" ? (
+        {season === "3" ? (
+          <>
+            {sortedS3.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg
+                    className="mx-auto h-12 w-12"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Coming Soon
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Season 3 rewards data will be available soon.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                          #
+                        </th>
+                        <th className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                          App
+                        </th>
+                        <th className="px-3 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                          Category
+                        </th>
+                        {s3Weeks.map((w, idx) => {
+                          const isActive = s3SortField === w;
+                          return (
+                            <th
+                              key={w}
+                              onClick={() => handleS3Sort(w)}
+                              className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
+                              title={w}
+                            >
+                              <span className="inline-flex items-center gap-1">
+                                {`Week ${idx + 1}`}
+                                {isActive ? (
+                                  s3Direction === "desc" ? (
+                                    <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                                  ) : (
+                                    <ChevronUpIcon className="h-4 w-4 text-blue-500" />
+                                  )
+                                ) : (
+                                  <ChevronUpIcon className="h-4 w-4 opacity-0 group-hover:opacity-50" />
+                                )}
+                              </span>
+                            </th>
+                          );
+                        })}
+                        <th
+                          onClick={() => handleS3Sort("total")}
+                          className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            Total
+                            {s3SortField === "total" ? (
+                              s3Direction === "desc" ? (
+                                <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                              ) : (
+                                <ChevronUpIcon className="h-4 w-4 text-blue-500" />
+                              )
+                            ) : null}
+                          </span>
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
+                          title={s3SortField === "total" ? undefined : s3SortField}
+                        >
+                          {s3SortField === "total"
+                            ? "Total"
+                            : `Week ${weekIndexMap.get(s3SortField) ?? ""}`}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {/* Category filter row */}
+                      <tr>
+                        <td className="px-3 py-3" colSpan={100}>
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="text-gray-600 font-medium flex-shrink-0">
+                              Filter:
+                            </span>
+                            <div className="flex gap-3 flex-1">
+                              <button
+                                className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                                  s3Category === "all"
+                                    ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                }`}
+                                onClick={() => setS3Category("all")}
+                              >
+                                All
+                              </button>
+                              <button
+                                className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                                  s3Category === "Airdrop"
+                                    ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                }`}
+                                onClick={() => setS3Category("Airdrop")}
+                              >
+                                Airdrop
+                              </button>
+                              <button
+                                className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                                  s3Category === "New Non Airdrop"
+                                    ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                }`}
+                                onClick={() => setS3Category("New Non Airdrop")}
+                              >
+                                New Non Airdrop
+                              </button>
+                              <button
+                                className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                                  s3Category === "Non Airdrop"
+                                    ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                }`}
+                                onClick={() => setS3Category("Non Airdrop")}
+                              >
+                                Non Airdrop
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      {sortedS3.map((row, i) => {
+                        const displayCategory = getCategoryForWeek(
+                          row,
+                          activeWeekForCategory
+                        );
+                        const hasCategoryChanges = row.categoryHistory.length > 1;
+                        const tooltipTitle = hasCategoryChanges
+                          ? "Category changed over time"
+                          : displayCategory
+                          ? `Category: ${displayCategory}`
+                          : "No category data";
+                        const tooltipDetails = hasCategoryChanges
+                          ? `History: ${row.categoryHistory.join(" → ")}`
+                          : undefined;
+                        const tooltipLabel = tooltipDetails
+                          ? `${tooltipTitle}. ${tooltipDetails}`
+                          : tooltipTitle;
+                        return (
+                          <tr
+                            key={row.app_id}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                              {i + 1}
+                            </td>
+                            <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                              <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="flex-shrink-0 h-10 w-10">
+                                  {row.logo_img_url ? (
+                                    <Image
+                                      className="h-10 w-10 rounded-full object-cover bg-gray-100"
+                                      src={row.logo_img_url}
+                                      alt={row.name}
+                                      width={40}
+                                      height={40}
+                                    />
+                                  ) : (
+                                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                      <span className="text-gray-500 text-xs font-medium">
+                                        {row.name.charAt(0).toUpperCase()}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900">
+                                    {row.name}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="hidden sm:table-cell text-xs text-gray-700 font-medium">
+                              <span
+                                className="relative inline-flex items-center group focus-visible:outline-none"
+                                tabIndex={0}
+                                aria-label={tooltipLabel}
+                              >
+                                <span
+                                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${categoryBadgeClass(
+                                    displayCategory ?? null
+                                  )}`}
+                                >
+                                  {displayCategory || "—"}
+                                  {hasCategoryChanges ? (
+                                    <span
+                                      className="ml-1 text-[10px] text-gray-500"
+                                      aria-hidden="true"
+                                    >
+                                      *
+                                    </span>
+                                  ) : null}
+                                </span>
+                                <div className="absolute bottom-full left-1/2 z-20 hidden w-56 -translate-x-1/2 -translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-xs text-white shadow-lg transition group-hover:flex group-focus-visible:flex flex-col text-left">
+                                  <span className="font-medium">
+                                    {tooltipTitle}
+                                  </span>
+                                  {tooltipDetails ? (
+                                    <span className="mt-1 text-gray-300">
+                                      {tooltipDetails}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </span>
+                            </td>
+                            {s3Weeks.map((w) => (
+                              <td
+                                key={w}
+                                className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
+                              >
+                                {formatNumberSafe(row.rewardsByWeek[w] || 0)}
+                              </td>
+                            ))}
+                            <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
+                              {formatNumberSafe(row.total ?? 0)}
+                            </td>
+                            {/* Mobile single value */}
+                            <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
+                              {formatNumberSafe(
+                                s3SortField === "total"
+                                  ? row.total
+                                  : row.rewardsByWeek[s3SortField] || 0
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                  <span aria-hidden="true">*</span>
+                  <span>App changed categories in previous weeks</span>
+                </div>
+              </>
+            )}
+          </>
+        ) : season === "2" ? (
           <>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                  <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
-                    #
-                  </th>
-                  <th className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
-                    App
-                  </th>
-                  <th className="px-3 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
-                    Category
-                  </th>
-                  {s2Weeks.map((w, idx) => {
-                    const isActive = s2SortField === w;
-                    return (
-                      <th
-                        key={w}
-                        onClick={() => handleS2Sort(w)}
-                        className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
-                        title={w}
-                      >
-                        <span className="inline-flex items-center gap-1">
-                          {`Week ${idx + 1}`}
-                          {isActive ? (
-                            s2Direction === "desc" ? (
-                              <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                    <th className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                      #
+                    </th>
+                    <th className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white text-left text-xs font-medium text-gray-500 uppercase before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                      App
+                    </th>
+                    <th className="px-3 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                      Category
+                    </th>
+                    {s2Weeks.map((w, idx) => {
+                      const isActive = s2SortField === w;
+                      return (
+                        <th
+                          key={w}
+                          onClick={() => handleS2Sort(w)}
+                          className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
+                          title={w}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            {`Week ${idx + 1}`}
+                            {isActive ? (
+                              s2Direction === "desc" ? (
+                                <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                              ) : (
+                                <ChevronUpIcon className="h-4 w-4 text-blue-500" />
+                              )
                             ) : (
-                              <ChevronUpIcon className="h-4 w-4 text-blue-500" />
-                            )
-                          ) : (
-                            <ChevronUpIcon className="h-4 w-4 opacity-0 group-hover:opacity-50" />
-                          )}
-                        </span>
-                      </th>
-                    );
-                  })}
-                  <th
-                    onClick={() => handleS2Sort("total")}
-                    className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      Total
-                      {s2SortField === "total" ? (
-                        s2Direction === "desc" ? (
-                          <ChevronDownIcon className="h-4 w-4 text-blue-500" />
-                        ) : (
-                          <ChevronUpIcon className="h-4 w-4 text-blue-500" />
-                        )
-                      ) : null}
-                    </span>
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
-                    title={s2SortField === "total" ? undefined : s2SortField}
-                  >
-                    {s2SortField === "total"
-                      ? "Total"
-                      : `Week ${weekIndexMap.get(s2SortField) ?? ""}`}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {/* Category filter row */}
-                <tr>
-                  <td className="px-3 py-3" colSpan={100}>
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="text-gray-600 font-medium flex-shrink-0">Filter:</span>
-                      <div className="flex gap-3 flex-1">
-                        <button
-                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                            s2Category === "all"
-                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
-                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setS2Category("all")}
-                        >
-                          All
-                        </button>
-                        <button
-                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                            s2Category === "Airdrop"
-                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
-                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setS2Category("Airdrop")}
-                        >
-                          Airdrop
-                        </button>
-                        <button
-                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                            s2Category === "New Non Airdrop"
-                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
-                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setS2Category("New Non Airdrop")}
-                        >
-                          New Non Airdrop
-                        </button>
-                        <button
-                          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                            s2Category === "Non Airdrop"
-                              ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
-                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setS2Category("Non Airdrop")}
-                        >
-                          Non Airdrop
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                {sortedS2.map((row, i) => {
-                  const displayCategory = getCategoryForWeek(
-                    row,
-                    activeWeekForCategory
-                  );
-                  const hasCategoryChanges = row.categoryHistory.length > 1;
-                  const tooltipTitle = hasCategoryChanges
-                    ? "Category changed over time"
-                    : displayCategory
-                    ? `Category: ${displayCategory}`
-                    : "No category data";
-                  const tooltipDetails = hasCategoryChanges
-                    ? `History: ${row.categoryHistory.join(" → ")}`
-                    : undefined;
-                  const tooltipLabel = tooltipDetails
-                    ? `${tooltipTitle}. ${tooltipDetails}`
-                    : tooltipTitle;
-                  return (
-                    <tr
-                      key={row.app_id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
-                        {i + 1}
-                      </td>
-                      <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
-                        <div className="flex items-center gap-3 sm:gap-4">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            {row.logo_img_url ? (
-                              <Image
-                                className="h-10 w-10 rounded-full object-cover bg-gray-100"
-                                src={row.logo_img_url}
-                                alt={row.name}
-                                width={40}
-                                height={40}
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                <span className="text-gray-500 text-xs font-medium">
-                                  {row.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
+                              <ChevronUpIcon className="h-4 w-4 opacity-0 group-hover:opacity-50" />
                             )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900">
-                              {row.name}
+                          </span>
+                        </th>
+                      );
+                    })}
+                    <th
+                      onClick={() => handleS2Sort("total")}
+                      className="px-2 sm:px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell cursor-pointer select-none"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        Total
+                        {s2SortField === "total" ? (
+                          s2Direction === "desc" ? (
+                            <ChevronDownIcon className="h-4 w-4 text-blue-500" />
+                          ) : (
+                            <ChevronUpIcon className="h-4 w-4 text-blue-500" />
+                          )
+                        ) : null}
+                      </span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
+                      title={s2SortField === "total" ? undefined : s2SortField}
+                    >
+                      {s2SortField === "total"
+                        ? "Total"
+                        : `Week ${weekIndexMap.get(s2SortField) ?? ""}`}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {/* Category filter row */}
+                  <tr>
+                    <td className="px-3 py-3" colSpan={100}>
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="text-gray-600 font-medium flex-shrink-0">
+                          Filter:
+                        </span>
+                        <div className="flex gap-3 flex-1">
+                          <button
+                            className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                              s2Category === "all"
+                                ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                            }`}
+                            onClick={() => setS2Category("all")}
+                          >
+                            All
+                          </button>
+                          <button
+                            className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                              s2Category === "Airdrop"
+                                ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                            }`}
+                            onClick={() => setS2Category("Airdrop")}
+                          >
+                            Airdrop
+                          </button>
+                          <button
+                            className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                              s2Category === "New Non Airdrop"
+                                ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                            }`}
+                            onClick={() => setS2Category("New Non Airdrop")}
+                          >
+                            New Non Airdrop
+                          </button>
+                          <button
+                            className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                              s2Category === "Non Airdrop"
+                                ? "bg-blue-100 border-blue-300 text-blue-800 shadow-sm"
+                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                            }`}
+                            onClick={() => setS2Category("Non Airdrop")}
+                          >
+                            Non Airdrop
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {sortedS2.map((row, i) => {
+                    const displayCategory = getCategoryForWeek(
+                      row,
+                      activeWeekForCategory
+                    );
+                    const hasCategoryChanges = row.categoryHistory.length > 1;
+                    const tooltipTitle = hasCategoryChanges
+                      ? "Category changed over time"
+                      : displayCategory
+                      ? `Category: ${displayCategory}`
+                      : "No category data";
+                    const tooltipDetails = hasCategoryChanges
+                      ? `History: ${row.categoryHistory.join(" → ")}`
+                      : undefined;
+                    const tooltipLabel = tooltipDetails
+                      ? `${tooltipTitle}. ${tooltipDetails}`
+                      : tooltipTitle;
+                    return (
+                      <tr
+                        key={row.app_id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-3 py-3 sm:py-4 text-sm text-gray-500 align-middle hidden sm:table-cell w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-30 bg-white">
+                          {i + 1}
+                        </td>
+                        <td className="pl-3 sm:pl-6 pr-3 sm:pr-6 py-3 sm:py-4 align-middle sticky left-0 sm:left-[48px] z-25 bg-white min-w-0 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[52px] before:bg-white before:-z-10">
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              {row.logo_img_url ? (
+                                <Image
+                                  className="h-10 w-10 rounded-full object-cover bg-gray-100"
+                                  src={row.logo_img_url}
+                                  alt={row.name}
+                                  width={40}
+                                  height={40}
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                  <span className="text-gray-500 text-xs font-medium">
+                                    {row.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs sm:text-sm md:text-base font-medium text-gray-900">
+                                {row.name}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="hidden sm:table-cell text-xs text-gray-700 font-medium">
-                        <span
-                          className="relative inline-flex items-center group focus-visible:outline-none"
-                          tabIndex={0}
-                          aria-label={tooltipLabel}
-                        >
-                          <span
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${categoryBadgeClass(
-                              displayCategory ?? null
-                            )}`}
-                          >
-                            {displayCategory || "—"}
-                            {hasCategoryChanges ? (
-                              <span
-                                className="ml-1 text-[10px] text-gray-500"
-                                aria-hidden="true"
-                              >
-                                *
-                              </span>
-                            ) : null}
-                          </span>
-                          <div className="absolute bottom-full left-1/2 z-20 hidden w-56 -translate-x-1/2 -translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-xs text-white shadow-lg transition group-hover:flex group-focus-visible:flex flex-col text-left">
-                            <span className="font-medium">{tooltipTitle}</span>
-                            {tooltipDetails ? (
-                              <span className="mt-1 text-gray-300">
-                                {tooltipDetails}
-                              </span>
-                            ) : null}
-                          </div>
-                        </span>
-                      </td>
-                      {s2Weeks.map((w) => (
-                        <td
-                          key={w}
-                          className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
-                        >
-                          {formatNumberSafe(row.rewardsByWeek[w] || 0)}
                         </td>
-                      ))}
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
-                        {formatNumberSafe(row.total ?? 0)}
-                      </td>
-                      {/* Mobile single value */}
-                      <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
-                        {formatNumberSafe(
-                          s2SortField === "total"
-                            ? row.total
-                            : row.rewardsByWeek[s2SortField] || 0
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td className="hidden sm:table-cell text-xs text-gray-700 font-medium">
+                          <span
+                            className="relative inline-flex items-center group focus-visible:outline-none"
+                            tabIndex={0}
+                            aria-label={tooltipLabel}
+                          >
+                            <span
+                              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${categoryBadgeClass(
+                                displayCategory ?? null
+                              )}`}
+                            >
+                              {displayCategory || "—"}
+                              {hasCategoryChanges ? (
+                                <span
+                                  className="ml-1 text-[10px] text-gray-500"
+                                  aria-hidden="true"
+                                >
+                                  *
+                                </span>
+                              ) : null}
+                            </span>
+                            <div className="absolute bottom-full left-1/2 z-20 hidden w-56 -translate-x-1/2 -translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-xs text-white shadow-lg transition group-hover:flex group-focus-visible:flex flex-col text-left">
+                              <span className="font-medium">
+                                {tooltipTitle}
+                              </span>
+                              {tooltipDetails ? (
+                                <span className="mt-1 text-gray-300">
+                                  {tooltipDetails}
+                                </span>
+                              ) : null}
+                            </div>
+                          </span>
+                        </td>
+                        {s2Weeks.map((w) => (
+                          <td
+                            key={w}
+                            className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell"
+                          >
+                            {formatNumberSafe(row.rewardsByWeek[w] || 0)}
+                          </td>
+                        ))}
+                        <td className="px-2 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm md:text-base font-medium text-gray-900 whitespace-nowrap align-middle hidden sm:table-cell">
+                          {formatNumberSafe(row.total ?? 0)}
+                        </td>
+                        {/* Mobile single value */}
+                        <td className="px-3 py-3 sm:py-4 text-right text-xs font-medium text-gray-900 whitespace-nowrap align-middle table-cell sm:hidden">
+                          {formatNumberSafe(
+                            s2SortField === "total"
+                              ? row.total
+                              : row.rewardsByWeek[s2SortField] || 0
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
             <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
               <span aria-hidden="true">*</span>
