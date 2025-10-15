@@ -715,7 +715,7 @@ export default function RewardsPage({
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const ar of w.app_rewards as any[]) {
-        const raw = isSeason3 ? ar.reward_wld : ar.rewards_usd;
+        const raw = ar.reward_wld;
         const cleaned =
           typeof raw === "string" ? raw.replace(/[,_\s]/g, "") : raw;
         const parsed = typeof cleaned === "number" ? cleaned : Number(cleaned);
@@ -782,7 +782,7 @@ export default function RewardsPage({
       s2Weeks: sortedS2Weeks,
       s2Rows: Array.from(s2AppMap.values()),
       s3Weeks: sortedS3Weeks,
-      s3Rows: Array.from(s3AppMap.values())
+      s3Rows: Array.from(s3AppMap.values()),
     };
   }, [weeklyRewards, logoByAppId]);
 
@@ -793,13 +793,10 @@ export default function RewardsPage({
     return map;
   }, [s2Weeks, s3Weeks]);
 
-  const latestS2Week = s2Weeks.length
-    ? s2Weeks[s2Weeks.length - 1]
-    : undefined;
-  const latestS3Week = s3Weeks.length
-    ? s3Weeks[s3Weeks.length - 1]
-    : undefined;
-  const latestWeek = season === "3" ? (latestS3Week ?? "total") : (latestS2Week ?? "total");
+  const latestS2Week = s2Weeks.length ? s2Weeks[s2Weeks.length - 1] : undefined;
+  const latestS3Week = s3Weeks.length ? s3Weeks[s3Weeks.length - 1] : undefined;
+  const latestWeek =
+    season === "3" ? latestS3Week ?? "total" : latestS2Week ?? "total";
   const s2SortField = searchParams.get("s2sort") || (latestS2Week ?? "total");
   const s2Direction = searchParams.get("s2dir") || "desc";
   const s2Category = (searchParams.get("s2cat") || "all") as
@@ -825,7 +822,15 @@ export default function RewardsPage({
       if (!s2SortField || s2SortField === "total") return latestS2Week;
       return s2Weeks.includes(s2SortField) ? s2SortField : latestS2Week;
     }
-  }, [season, s2SortField, s2Weeks, latestS2Week, s3SortField, s3Weeks, latestS3Week]);
+  }, [
+    season,
+    s2SortField,
+    s2Weeks,
+    latestS2Week,
+    s3SortField,
+    s3Weeks,
+    latestS3Week,
+  ]);
 
   const s2RowsFiltered = useMemo(() => {
     if (s2Category === "all") return s2Rows;
@@ -992,7 +997,9 @@ export default function RewardsPage({
     season === "1"
       ? data.reduce((sum, app) => sum + app.wave11, 0)
       : season === "3"
-      ? s3Weeks.length > 0 ? 100000 : 0
+      ? s3Weeks.length > 0
+        ? 100000
+        : 0
       : sortedS2.reduce(
           (sum, app) => sum + (app.rewardsByWeek[latestWeek] || 0),
           0
@@ -1265,7 +1272,9 @@ export default function RewardsPage({
                         <th
                           scope="col"
                           className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap table-cell sm:hidden"
-                          title={s3SortField === "total" ? undefined : s3SortField}
+                          title={
+                            s3SortField === "total" ? undefined : s3SortField
+                          }
                         >
                           {s3SortField === "total"
                             ? "Total"
@@ -1331,7 +1340,8 @@ export default function RewardsPage({
                           row,
                           activeWeekForCategory
                         );
-                        const hasCategoryChanges = row.categoryHistory.length > 1;
+                        const hasCategoryChanges =
+                          row.categoryHistory.length > 1;
                         const tooltipTitle = hasCategoryChanges
                           ? "Category changed over time"
                           : displayCategory
