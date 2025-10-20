@@ -17,7 +17,6 @@ import grantsData from "../public/grants1.json";
 import Link from "next/link";
 import MobileNav from "./components/MobileNav";
 import ScrollToTop from "./components/ScrollToTop";
-import EventBanner from "./components/EventBanner";
 import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -201,12 +200,6 @@ export default async function Home({
               >
                 Country Rankings
               </Link>
-              <Link
-                href="https://worldbuild.fwb.help/"
-                className="text-xl font-medium text-gray-900"
-              >
-                World Build
-              </Link>
             </div>
             <AnalyticsWrapper>
               <SearchField />
@@ -240,7 +233,6 @@ export default async function Home({
       </header>
 
       <main className="relative flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <EventBanner />
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
