@@ -258,7 +258,16 @@ async function getData(): Promise<{
     >();
 
     // Sanctioned countries to exclude
-    const sanctionedCountries = ["CN", "RU"];
+    const sanctionedCountries = [
+      "CN", // China
+      "RU", // Russia
+      "CU", // Cuba
+      "IR", // Iran
+      "KP", // North Korea
+      "SY", // Syria
+      "VE", // Venezuela
+      "BY", // Belarus
+    ];
 
     metricsData.forEach((metric) => {
       const appInfo = appMap.get(metric.app_id);

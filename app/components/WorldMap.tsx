@@ -411,7 +411,16 @@ export default function WorldMap({
         >
           <Geographies geography={geoUrl}>
             {({ geographies }: { geographies: GeographyFeature[] }) => {
-              const sanctionedCountries = ["CN", "RU"];
+              const sanctionedCountries = [
+                "CN", // China
+                "RU", // Russia
+                "CU", // Cuba
+                "IR", // Iran
+                "KP", // North Korea
+                "SY", // Syria
+                "VE", // Venezuela
+                "BY", // Belarus
+              ];
 
               const result = geographies.map((geo: GeographyFeature) => {
                 const geoName =
