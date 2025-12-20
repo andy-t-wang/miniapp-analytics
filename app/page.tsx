@@ -41,7 +41,7 @@ async function getData(): Promise<AppData[]> {
     const [metricsRes, appsRes] = await Promise.all([
       fetch("https://metrics.worldcoin.org/miniapps/stats/data.json", {}),
       fetch(
-        "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
+        "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true&app_mode=mini-app&limit=1000",
         {
           next: { revalidate: 1800 },
         }

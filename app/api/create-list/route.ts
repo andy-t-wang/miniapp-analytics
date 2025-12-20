@@ -116,7 +116,7 @@ export async function GET() {
 
     // Fetch data from API
     const res = await fetch(
-      `https://world-id-assets.com/api/v2/public/apps?skip_country_check=true`
+      `https://world-id-assets.com/api/v2/public/apps?skip_country_check=true&limit=1000`
     );
 
     if (!res.ok) {
