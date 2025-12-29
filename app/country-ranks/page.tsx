@@ -233,7 +233,7 @@ async function getData(): Promise<{
       fetch(
         "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
         {
-          next: { revalidate: 86400 },
+          next: { revalidate: 1800 },
         }
       ),
     ]);

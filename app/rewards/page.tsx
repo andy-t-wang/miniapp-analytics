@@ -25,7 +25,7 @@ export default async function RewardsPageWrapper() {
     const appsMetadata = await fetch(
       "https://world-id-assets.com/api/v2/public/apps?skip_country_check=true",
       {
-        next: { revalidate: 86400 }, // Every 24 hours
+        next: { revalidate: 1800 }, // Every 24 hours
       }
     );
     return appsMetadata.json();
